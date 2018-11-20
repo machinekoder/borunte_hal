@@ -7,8 +7,8 @@ class PinGroup(object):
     def __init__(self, name):
         self.name = name
 
-    def __getitem__(self, item):
-        return hal.Pin('{}.{}'.format(self.name, item))
+    def pin(self, name):
+        return hal.Pin('{}.{}'.format(self.name, name))
 
 
 HalThread = namedtuple('Thread', 'name period_ns')

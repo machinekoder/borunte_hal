@@ -18,6 +18,7 @@ class Hardware(object):
         :type thread: HalThread
         """
         self.thread = thread
+        self._io_pins = {}
 
         rt.loadrt('hostmot2')
         rt.loadrt(
@@ -33,6 +34,8 @@ class Hardware(object):
         self._setup_joints()
         self._setup_io()
         self._setup_brakes()
+        self._setup_servo_on()
+        self._setup_estop()
 
     def write(self):
         hal.addf('hm2_7i80.0.pet_watchdog', self.thread.name)
@@ -47,44 +50,47 @@ class Hardware(object):
             scale = c['gear_ratio'] * c['steps_per_rev'] / pi
             nr = 6 - i
             stepgen = PinGroup('hm2_7i80.0.stepgen.{:02}'.format(nr))
-            stepgen['step_type'].set(0)  # 0 = Step/Dir, 1 = Up/Down, 2 = Quadrature
-            stepgen['control-type'].set(0)  # position mode
-            stepgen['dirhold'].set(c['dirhold_ns'])
-            stepgen['dirsetup'].set(c['dirsetup_ns'])
-            stepgen['steplen'].set(c['steplen_ns'])
-            stepgen['stepspace'].set(c['stepspace_ns'])
-            stepgen['position-scale'].set(scale)
-            stepgen['maxvel'].set(c['max_vel_rad_s'] / 10)
-            stepgen['maxaccel'].set(c['max_accel_rad_s2'] / 10)
+            stepgen.pin('step_type').set(0)  # 0 = Step/Dir, 1 = Up/Down, 2 = Quadrature
+            stepgen.pin('control-type').set(0)  # position mode
+            stepgen.pin('dirhold').set(c['dirhold_ns'])
+            stepgen.pin('dirsetup').set(c['dirsetup_ns'])
+            stepgen.pin('steplen').set(c['steplen_ns'])
+            stepgen.pin('stepspace').set(c['stepspace_ns'])
+            stepgen.pin('position-scale').set(scale)
+            stepgen.pin('maxvel').set(c['max_vel_rad_s'] / 10)
+            stepgen.pin('maxaccel').set(c['max_accel_rad_s2'] / 10)
 
-            stepgen['enable'].set(True)
+            stepgen.pin('enable').link('son-{}'.format(i))
 
             # wire position-cmd, position-fb
             # setup limits
 
             # encoders
             encoder = PinGroup('hm2_7i80.0.encoder.{:02}'.format(nr))
-            encoder['index-enable'].set(False)
-            encoder['filter'].set(True)  # use 15 clocks to register change
-            encoder['scale'].set(-scale)
+            encoder.pin('index-enable').set(False)
+            encoder.pin('filter').set(True)  # use 15 clocks to register change
+            encoder.pin('scale').set(-scale)
 
         # set rs-485 tx enable pins
         tx0_en = PinGroup('hm2_7i80.0.gpio.071')
-        tx0_en['is_output'].set(True)
-        tx0_en['out'].set(False)
+        tx0_en.pin('is_output').set(True)
+        tx0_en.pin('out').set(False)
         tx3_en = PinGroup('hm2_7i80.0.gpio.048')
-        tx3_en['is_output'].set(True)
-        tx3_en['out'].set(False)
+        tx3_en.pin('is_output').set(True)
+        tx3_en.pin('out').set(False)
 
     def _setup_io(self):
+        io_pins = {}
+
         def link_io_pin(name, type_, nr, board):
             pin = PinGroup(name)
-            pin['is_output'].set(type_ == hal.HAL_OUT)
+            pin.pin('is_output').set(type_ == hal.HAL_OUT)
             if type_ == hal.HAL_OUT:
-                pin['invert_output'].set(True)
+                pin.pin('invert_output').set(True)
+            else:
+                pin.pin('invert_input').set(True)
             dir_ = 'out' if type_ == hal.HAL_OUT else 'in'
-            signal = hal.Signal('{}-{}-{}'.format(board, dir_, nr), hal.HAL_BIT)
-            signal.link(pin[dir_])
+            io_pins['{}-{}-{}'.format(board, dir_, nr)] = pin
 
         # i/o pins
         for nr, i in enumerate(range(16)):
@@ -95,6 +101,8 @@ class Hardware(object):
             link_io_pin('hm2_7i80.0.gpio.{:03}'.format(i), hal.HAL_IN, nr, board='io1')
         for nr, i in enumerate(range(40, 48)):
             link_io_pin('hm2_7i80.0.gpio.{:03}'.format(i), hal.HAL_OUT, nr, board='io1')
+
+        self._io_pins = io_pins
 
     def _setup_brakes(self):
         Brake = namedtuple('Brake', 'input output')
@@ -107,7 +115,13 @@ class Hardware(object):
             Brake(input='io2-in-14', output='io1-out-4'),
         )
         for i, brake in enumerate(brakes):
-            or2 = rt.newinst('not', 'not-break-{}'.format(i + 1))
-            or2.pin('in').link(hal.Signal(brake.input))
-            or2.pin('out').link(hal.Signal(brake.output))
-            hal.addf(or2.name, self.thread.name)
+            brake_signal = hal.Signal('brake-{}'.format(i + 1), hal.HAL_BIT)
+            brake_signal.link(self._io_pins[brake.input].pin('in'))
+            brake_signal.link(self._io_pins[brake.output].pin('out'))
+
+    def _setup_servo_on(self):
+        for i in range(NUM_JOINTS):
+            self._io_pins['io2-out-{}'.format(5-i)].link('son-{}'.format(i+1))
+
+    def _setup_estop(self):
+        self._io_pins['io1-in-14'].link('estop')  # true is estop active
