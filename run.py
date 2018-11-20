@@ -34,6 +34,7 @@ def main():
     try:
         launcher.check_installation()
         launcher.cleanup_session()  # kill any running Machinekit instances
+        launcher.install_comp('./components/absolute_joint.icomp')
         launcher.start_realtime()  # start Machinekit realtime environment
 
         launcher.ensure_mklauncher()
