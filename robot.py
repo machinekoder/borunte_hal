@@ -1,13 +1,20 @@
 # coding=utf-8
 from __future__ import division
 
+import os
 from machinekit import hal
 from machinekit import rtapi as rt
 
-from hardware import Hardware
 from utils import HalThread
 
+SIM_MODE = bool(os.environ.get('SIM_MODE', 0))
 MAIN_THREAD = HalThread(name='main_thread', period_ns=1e8)
+
+
+if SIM_MODE:
+    from sim_hardware import Hardware
+else:
+    from hardware import Hardware
 
 
 def setup_threads():
