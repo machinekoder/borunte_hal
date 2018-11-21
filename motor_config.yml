@@ -9,6 +9,7 @@ joint_1:
   max_accel_rad_s2: 15.7
   min_limit_rad: -1.484
   max_limit_rad: 1.484
+  home_pos: 2058.805
 
 joint_2:
   gear_ratio: 100.0
@@ -21,6 +22,7 @@ joint_2:
   max_accel_rad_s2: 10.0
   min_limit_rad: -0.785
   max_limit_rad: 0.785
+  home_pos: -0.1985267
 
 joint_3:
   gear_ratio: 101.0
@@ -33,6 +35,7 @@ joint_3:
   max_accel_rad_s2: 13.0
   min_limit_rad: -0.785
   max_limit_rad: 0.611
+  home_pos: 2038.563
 
 joint_4:
   gear_ratio: 80.0
@@ -45,6 +48,7 @@ joint_4:
   max_accel_rad_s2: 20.0
   min_limit_rad: -0.785
   max_limit_rad: 0.785
+  home_pos: 2573.584
 
 joint_5:
   gear_ratio: 51.0
@@ -57,6 +61,7 @@ joint_5:
   max_accel_rad_s2: 23.5
   min_limit_rad: -0.785
   max_limit_rad: 0.785
+  home_pos: -0.1590015
 
 joint_6:
   gear_ratio: 50.0
@@ -69,3 +74,4 @@ joint_6:
   max_accel_rad_s2: 23.5
   min_limit_rad: -3.142
   max_limit_rad: 3.142
+  home_pos: 4089.085
