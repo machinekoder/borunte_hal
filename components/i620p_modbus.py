@@ -7,7 +7,7 @@ import os
 import time
 from collections import namedtuple
 from ctypes import c_int32
-from machinekit import hal
+import hal
 
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 
@@ -71,7 +71,7 @@ class IS620Component(object):
             self._client.close()
 
     def _init_comp(self):
-        self.comp = hal.Component(self.name)
+        self.comp = hal.component(self.name)
         self._error_pin = self.comp.newpin('error', hal.HAL_BIT, hal.HAL_OUT)
         self._watchdog_pin = self.comp.newpin('watchdog', hal.HAL_BIT, hal.HAL_OUT)
         for i in range(self.num_servos):
