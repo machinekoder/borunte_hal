@@ -38,8 +38,8 @@ def create_io_remote_component():
 
 def create_signals():
     for i in range(1, NUM_JOINTS+1):
-        hal.Signal('son-{}', hal.HAL_BIT)
-        hal.Signal('brake-{}', hal.HAL_BIT)
+        hal.Signal('son-{}'.format(i), hal.HAL_BIT)
+        hal.Signal('brake-release-{}'.format(i), hal.HAL_BIT)
     hal.Signal('estop', hal.HAL_BIT)
 
 

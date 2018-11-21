@@ -25,6 +25,11 @@ class Hardware(object):
             'hm2_eth', board_ip=MESA_BOARD_IP, config='"num_encoders=6,num_stepgens=6"'
         )
 
+        hal.loadusr(
+            './components/i620p_modbus.py -c {} -n i620p-abs'.format(NUM_JOINTS),
+            wait_name='i620p-abs',
+        )
+
         hal.Pin('hm2_7i80.0.watchdog.timeout_ns').set(int(self.thread.period_ns * 2))
 
     def read(self):
@@ -71,6 +76,9 @@ class Hardware(object):
             encoder.pin('filter').set(True)  # use 15 clocks to register change
             encoder.pin('scale').set(-scale)
 
+            encoder_abs = PinGroup('i620p-abs.{}'.format(i))
+            encoder_abs.pin('scale').set(scale)
+
         # set rs-485 tx enable pins
         tx0_en = PinGroup('hm2_7i80.0.gpio.071')
         tx0_en.pin('is_output').set(True)
@@ -87,8 +95,6 @@ class Hardware(object):
             pin.pin('is_output').set(type_ == hal.HAL_OUT)
             if type_ == hal.HAL_OUT:
                 pin.pin('invert_output').set(True)
-            else:
-                pin.pin('invert_input').set(True)
             dir_ = 'out' if type_ == hal.HAL_OUT else 'in'
             io_pins['{}-{}-{}'.format(board, dir_, nr)] = pin
 
@@ -115,13 +121,15 @@ class Hardware(object):
             Brake(input='io2-in-14', output='io1-out-4'),
         )
         for i, brake in enumerate(brakes):
-            brake_signal = hal.Signal('brake-{}'.format(i + 1), hal.HAL_BIT)
-            brake_signal.link(self._io_pins[brake.input].pin('in'))
+            brake_signal = hal.Signal('brake-release-{}'.format(i + 1), hal.HAL_BIT)
+            brake_signal.link(self._io_pins[brake.input].pin('in_not'))
             brake_signal.link(self._io_pins[brake.output].pin('out'))
 
     def _setup_servo_on(self):
         for i in range(NUM_JOINTS):
-            self._io_pins['io2-out-{}'.format(5-i)].link('son-{}'.format(i+1))
+            self._io_pins['io2-out-{}'.format(5 - i)].pin('out').link(
+                'son-{}'.format(i + 1)
+            )
 
     def _setup_estop(self):
-        self._io_pins['io1-in-14'].link('estop')  # true is estop active
+        self._io_pins['io1-in-14'].pin('in').link('estop')  # true is estop active

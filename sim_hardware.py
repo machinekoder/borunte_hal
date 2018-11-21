@@ -42,7 +42,7 @@ class Hardware(object):
     def _setup_brakes(self):
         # pass through SON to brake disable signal
         for i in range(1, NUM_JOINTS + 1):
-            or2 = rt.newinst('or2', 'or2-brake-{}'.format(i))
+            or2 = rt.newinst('or2', 'or2-brake-release-{}'.format(i))
             hal.addf(or2.name, self.thread.name)
             or2.pin('in0').link('son-{}'.format(i))
-            or2.pin('out').link('brake-{}'.format(i))
+            or2.pin('out').link('brake-release-{}'.format(i))
