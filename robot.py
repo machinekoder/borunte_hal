@@ -57,6 +57,7 @@ def setup_joint_offset(nr, thread):
     limit_max = hal.Signal('joint-{}-limit-max'.format(nr), hal.HAL_FLOAT)
     son = hal.Signal('son-{}'.format(nr), hal.HAL_BIT)
     son_not = hal.Signal('son-{}-not'.format(nr), hal.HAL_BIT)
+    set_home = hal.Signal('joint-{}-set-home'.format(nr), hal.HAL_BIT)
 
     offset = rt.newinst('offsetv2', 'offset-joint-{}'.format(nr))
     offset.pin('offset').link(pos_offset)
@@ -72,6 +73,7 @@ def setup_joint_offset(nr, thread):
     abs_joint.pin('fb-pos').link(fb_in_pos)
     abs_joint.pin('offset').link(pos_offset)
     abs_joint.pin('set-abs').link(son_not)
+    abs_joint.pin('set-home').link(set_home)
 
     not_son = rt.newinst('notv2', 'not-son-{}'.format(nr))
     not_son.pin('in').link(son)

@@ -67,23 +67,24 @@ class Hardware(object):
             stepgen.pin('maxvel').set(c['max_vel_rad_s'] / 10)
             stepgen.pin('maxaccel').set(c['max_accel_rad_s2'] / 10)
             stepgen.pin('enable').link('son-{}'.format(i))
-            stepgen.pin('position-cmd').link('joint-{}-cmd-out'.format(i))
+            stepgen.pin('position-cmd').link('joint-{}-cmd-out-pos'.format(i))
 
             # encoder
             encoder = PinGroup('hm2_7i80.0.encoder.{:02}'.format(nr))
             encoder.pin('index-enable').set(False)
             encoder.pin('filter').set(True)  # use 15 clocks to register change
             encoder.pin('scale').set(-scale)
-            encoder.pin('pos-fb').link('joint-{}-fb-in'.format(i))
+            encoder.pin('position').link('joint-{}-fb-in-pos'.format(i))
 
             # encoder abs
             encoder_abs = PinGroup('i620p-abs.{}'.format(i))
             encoder_abs.pin('scale').set(scale)
             encoder_abs.pin('abs-pos').link('joint-{}-abs-pos'.format(i))
+            hal.Signal('joint-{}-home-pos'.format(i)).set(c['home_pos'])
 
             # setup limits
-            hal.Signal('joint-{}-limit-min').set(c['min_limit_rad'])
-            hal.Signal('joint-{}-limit-max').set(c['max_limit_rad'])
+            hal.Signal('joint-{}-limit-min'.format(i)).set(c['min_limit_rad'])
+            hal.Signal('joint-{}-limit-max'.format(i)).set(c['max_limit_rad'])
 
         # set rs-485 tx enable pins
         tx0_en = PinGroup('hm2_7i80.0.gpio.071')
