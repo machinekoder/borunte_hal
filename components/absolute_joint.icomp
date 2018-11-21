@@ -3,7 +3,7 @@ pin_ptr io float home_pos;
 pin_ptr in float abs_pos;
 pin_ptr in float fb_pos;
 pin_ptr out float offset;
-pin_ptr out float real_pos;
+pin_ptr io float real_pos;
 pin_ptr in bit set_abs;
 pin_ptr in bit set_home;
 
@@ -16,8 +16,8 @@ FUNCTION(_)
     if (gb(set_home)) {
         sf(home_pos, gf(abs_pos));
     }
-    sf(real_pos, gf(abs_pos) - gf(home_pos));
     if (gb(set_abs) || gb(set_home)) {
+        sf(real_pos, gf(abs_pos) - gf(home_pos));
         sf(offset, gf(fb_pos) - gf(real_pos));
     }
     return 0;
