@@ -53,12 +53,13 @@ def main():
             launcher.check_processes()
             time.sleep(1)
 
-    except Exception as e:
-        sys.stderr.write(
-            '\n\n--------- ERROR ---------\n%s\n-------------------------\n\n' % str(e)
-        )
+    except KeyboardInterrupt:
+        # sys.stderr.write(
+        #     '\n\n--------- ERROR ---------\n%s\n-------------------------\n\n' % str(e)
+        # )
+        sys.exit(0)
+    finally:
         launcher.end_session()
-        sys.exit(1)
 
 
 if __name__ == '__main__':

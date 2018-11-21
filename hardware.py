@@ -54,6 +54,8 @@ class Hardware(object):
             c = config['joint_{}'.format(i)]
             scale = c['gear_ratio'] * c['steps_per_rev'] / pi
             nr = 6 - i
+
+            # stepgen
             stepgen = PinGroup('hm2_7i80.0.stepgen.{:02}'.format(nr))
             stepgen.pin('step_type').set(0)  # 0 = Step/Dir, 1 = Up/Down, 2 = Quadrature
             stepgen.pin('control-type').set(0)  # position mode
@@ -64,20 +66,24 @@ class Hardware(object):
             stepgen.pin('position-scale').set(scale)
             stepgen.pin('maxvel').set(c['max_vel_rad_s'] / 10)
             stepgen.pin('maxaccel').set(c['max_accel_rad_s2'] / 10)
-
             stepgen.pin('enable').link('son-{}'.format(i))
+            stepgen.pin('position-cmd').link('joint-{}-cmd-out'.format(i))
 
-            # wire position-cmd, position-fb
-            # setup limits
-
-            # encoders
+            # encoder
             encoder = PinGroup('hm2_7i80.0.encoder.{:02}'.format(nr))
             encoder.pin('index-enable').set(False)
             encoder.pin('filter').set(True)  # use 15 clocks to register change
             encoder.pin('scale').set(-scale)
+            encoder.pin('pos-fb').link('joint-{}-fb-in'.format(i))
 
+            # encoder abs
             encoder_abs = PinGroup('i620p-abs.{}'.format(i))
             encoder_abs.pin('scale').set(scale)
+            encoder_abs.pin('abs-pos').link('joint-{}-abs-pos'.format(i))
+
+            # setup limits
+            hal.Signal('joint-{}-limit-min').set(c['min_limit_rad'])
+            hal.Signal('joint-{}-limit-max').set(c['max_limit_rad'])
 
         # set rs-485 tx enable pins
         tx0_en = PinGroup('hm2_7i80.0.gpio.071')
