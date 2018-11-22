@@ -9,7 +9,7 @@ from machinekit import hal
 from machinekit import rtapi as rt
 
 setattr(sys, 'testing', True)
-from robot import setup_joint_offset, setup_joint_ferror
+from robot import BorunteConfig
 
 WAIT_TIME_S = 0.1
 
@@ -36,7 +36,7 @@ def joint_offsets(hal_config):
         ferror_active = hal.Signal('joint-{}-ferror-active'.format(nr), hal.HAL_BIT)
 
         def __init__(self):
-            setup_joint_offset(nr, hal_config.thread)
+            BorunteConfig._setup_joint_offset(nr, hal_config.thread)
 
             # feed back the output for now
             sum2 = rt.newinst('sum2v2', 'sum2-{}-test'.format(nr))
@@ -60,7 +60,7 @@ def joint_ferror(hal_config):
         ferror_active = hal.Signal('joint-{}-ferror-active'.format(nr), hal.HAL_BIT)
 
         def __init__(self):
-            setup_joint_ferror(nr, hal_config.thread)
+            BorunteConfig._setup_joint_ferror(nr, hal_config.thread)
 
     return Ferror()
 
