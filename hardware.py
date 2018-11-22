@@ -41,6 +41,8 @@ class Hardware(object):
         self._setup_brakes()
         self._setup_servo_on()
         self._setup_estop()
+        self._setup_drive_alarm()
+        self._setup_lamp()
 
     def write(self):
         hal.addf('hm2_7i80.0.pet_watchdog', self.thread.name)
@@ -137,6 +139,24 @@ class Hardware(object):
             self._io_pins['io2-out-{}'.format(5 - i)].pin('out').link(
                 'son-{}'.format(i + 1)
             )
+
+    def _setup_drive_alarm(self):
+        alarm_ios = (
+            'io2-in-0',
+            'io2-in-4',
+            'io2-in-9',
+            'io2-in-13',
+            'io2-in-8',
+            'io2-in-12',
+        )
+        for i, io in enumerate(alarm_ios):
+            self._io_pins[io].pin('in').link('drive-alarm-{}'.format(i))
+
+    def _setup_lamp(self):
+        self._io_pins['io1-out-0'].pin('out').link('lamp-red')
+        self._io_pins['io1-out-1'].pin('out').link('lamp-yellow')
+        self._io_pins['io1-out-2'].pin('out').link('lamp-green')
+        self._io_pins['io1-out-3'].pin('out').link('lamp-signal')
 
     def _setup_estop(self):
         self._io_pins['io1-in-14'].pin('in').link('estop')  # true is estop active
