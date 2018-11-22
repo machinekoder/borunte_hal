@@ -41,7 +41,12 @@ def create_signals():
     for i in range(1, NUM_JOINTS + 1):
         hal.Signal('son-{}'.format(i), hal.HAL_BIT)
         hal.Signal('brake-release-{}'.format(i), hal.HAL_BIT)
+        hal.Signal('drive-alarm-{}'.format(i), hal.HAL_BIT)
     hal.Signal('estop', hal.HAL_BIT)
+    hal.Signal('lamp-red', hal.HAL_BIT)
+    hal.Signal('lamp-green', hal.HAL_BIT)
+    hal.Signal('lamp-yellow', hal.HAL_BIT)
+    hal.Signal('lamp-signal', hal.HAL_BIT)
 
 
 def setup_joint_offset(nr, thread):
