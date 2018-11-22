@@ -12,3 +12,4 @@ class PinGroup(object):
 
 
 HalThread = namedtuple('Thread', 'name period_ns')
+UserComp = namedtuple('UserComp', 'name timeout')

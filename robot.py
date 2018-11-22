@@ -6,7 +6,7 @@ import sys
 from machinekit import hal
 from machinekit import rtapi as rt
 
-from utils import HalThread
+from utils import HalThread, UserComp
 
 SIM_MODE = bool(os.environ.get('SIM_MODE', 0))
 MAIN_THREAD = HalThread(name='main_thread', period_ns=1e8)
@@ -22,6 +22,7 @@ else:
 class BorunteConfig(object):
     def __init__(self):
         self.hardware = None
+        self.user_comps = []
 
     def init(self):
         self.hardware = Hardware(thread=MAIN_THREAD)
@@ -36,9 +37,13 @@ class BorunteConfig(object):
         self._create_lamp_control()
         self.hardware.setup()
 
+        self._setup_usrcomp_watchdog(
+            comps=self.user_comps + self.hardware.user_comps, thread=MAIN_THREAD
+        )
+
         self.hardware.write()
 
-        self._create_io_remote_component()
+        # self._create_io_remote_component()
 
     @staticmethod
     def _setup_threads():
@@ -58,8 +63,7 @@ class BorunteConfig(object):
 
         control.pin('watchdog_has_bit').link('hm2_7i80.0.watchdog.has_bit')
 
-    @staticmethod
-    def _create_lamp_control():
+    def _create_lamp_control(self):
         blink_interval_s = 0.5
         interval_s = 0.1
         name = 'lamp-control'
@@ -75,6 +79,30 @@ class BorunteConfig(object):
         lamp.pin('lamp-green').link('lamp-green')
         lamp.pin('lamp-yellow').link('lamp-yellow')
         lamp.pin('signal').link('lamp-signal')
+
+        self.user_comps.append(UserComp(name=name, timeout=(interval_s * 2)))
+
+    @staticmethod
+    def _setup_usrcomp_watchdog(comps, thread):
+        power_enable = hal.Signal('power-enable', hal.HAL_BIT)
+        watchdog_ok = hal.Signal('watchdog-ok', hal.HAL_BIT)
+        watchdog_error = hal.Signal('watchdog-error', hal.HAL_BIT)
+
+        watchdog = rt.newinst('watchdog', 'watchdog-usrcomp', pincount=len(comps))
+        hal.addf('{}.set-timeouts'.format(watchdog.name), thread.name)
+        hal.addf('{}.process'.format(watchdog.name), thread.name)
+        for n, comp in enumerate(comps):
+            sig_in = hal.newsig('{}-watchdog'.format(comp.name), hal.HAL_BIT)
+            hal.Pin('{}.watchdog'.format(comp.name)).link(sig_in)
+            watchdog.pin('input-{:02}'.format(n)).link(sig_in)
+            watchdog.pin('timeout-{:02}'.format(n)).set(comp.timeout)
+        watchdog.pin('enable-in').link(power_enable)
+        watchdog.pin('ok-out').link(watchdog_ok)
+
+        not_comp = rt.newinst('not', 'not-watchdog-error')
+        hal.addf(not_comp.name, thread.name)
+        not_comp.pin('in').link(watchdog_ok)
+        not_comp.pin('out').link(watchdog_error)
 
     @staticmethod
     def _create_signals():

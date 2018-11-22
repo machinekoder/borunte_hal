@@ -6,7 +6,7 @@ import yaml
 from machinekit import hal
 from machinekit import rtapi as rt
 
-from utils import HalThread, PinGroup
+from utils import HalThread, PinGroup, UserComp
 
 MESA_BOARD_IP = '192.168.1.121'
 NUM_JOINTS = 6
@@ -19,18 +19,28 @@ class Hardware(object):
         """
         self.thread = thread
         self._io_pins = {}
+        self.user_comps = []
 
+        self._init_hm2()
+        self._init_modbus()
+
+    def _init_hm2(self):
         rt.loadrt('hostmot2')
         rt.loadrt(
             'hm2_eth', board_ip=MESA_BOARD_IP, config='"num_encoders=6,num_stepgens=6"'
         )
+        hal.Pin('hm2_7i80.0.watchdog.timeout_ns').set(int(self.thread.period_ns * 2))
 
+    def _init_modbus(self):
+        name = 'i620p-abs'
+        interval_s = 1.0
         hal.loadusr(
-            './components/i620p_modbus.py -c {} -n i620p-abs'.format(NUM_JOINTS),
+            './components/i620p_modbus.py -c {} -n {} -i {}'.format(
+                NUM_JOINTS, name, interval_s
+            ),
             wait_name='i620p-abs',
         )
-
-        hal.Pin('hm2_7i80.0.watchdog.timeout_ns').set(int(self.thread.period_ns * 2))
+        self.user_comps.append(UserComp(name=name, timeout=(interval_s * 2.0)))
 
     def read(self):
         hal.addf('hm2_7i80.0.read', self.thread.name)

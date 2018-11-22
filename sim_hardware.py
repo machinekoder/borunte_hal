@@ -10,6 +10,7 @@ NUM_JOINTS = 6
 class Hardware(object):
     def __init__(self, thread):
         self.thread = thread
+        self.user_comps = []
 
         self._init_stepgens()
         self._init_encoders()
