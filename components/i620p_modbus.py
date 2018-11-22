@@ -37,6 +37,7 @@ class IS620Component(object):
         )
         self._connected = False
 
+        self._comp = None
         self._error_pin = None
         self._watchdog_pin = None
         self._servo_pins = []
@@ -71,24 +72,24 @@ class IS620Component(object):
             self._client.close()
 
     def _init_comp(self):
-        self.comp = hal.component(self.name)
-        self._error_pin = self.comp.newpin('error', hal.HAL_BIT, hal.HAL_OUT)
-        self._watchdog_pin = self.comp.newpin('watchdog', hal.HAL_BIT, hal.HAL_OUT)
+        self._comp = hal.component(self.name)
+        self._error_pin = self._comp.newpin('error', hal.HAL_BIT, hal.HAL_OUT)
+        self._watchdog_pin = self._comp.newpin('watchdog', hal.HAL_BIT, hal.HAL_OUT)
         for i in range(self.num_servos):
             servo_pins = ServoPins(
-                raw_ticks=self.comp.newpin(
+                raw_ticks=self._comp.newpin(
                     '{}.raw-ticks'.format(i + 1), hal.HAL_S32, hal.HAL_OUT
                 ),
-                scale=self.comp.newpin(
+                scale=self._comp.newpin(
                     '{}.scale'.format(i + 1), hal.HAL_FLOAT, hal.HAL_IN
                 ),
-                abs_pos=self.comp.newpin(
+                abs_pos=self._comp.newpin(
                     '{}.abs-pos'.format(i + 1), hal.HAL_FLOAT, hal.HAL_OUT
                 ),
             )
             servo_pins.scale.set(1.0)
             self._servo_pins.append(servo_pins)
-        self.comp.ready()
+        self._comp.ready()
 
     def _read_encoder_ticks(self, unit):
         rr = self._client.read_holding_registers(address=0xB07, count=2, unit=unit)
@@ -106,7 +107,6 @@ def main():
     parser.add_argument('-n', '--name', help='HAL component name', required=True)
     parser.add_argument('-c', '--count', help='Number of servos', required=True)
     parser.add_argument('-i', '--interval', help='Update interval', default=1.00)
-    parser.add_argument('-d', '--debug', help='Enable debug', action='store_true')
     args = parser.parse_args()
 
     comp = IS620Component(

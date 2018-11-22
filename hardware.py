@@ -97,13 +97,13 @@ class Hardware(object):
     def _setup_io(self):
         io_pins = {}
 
-        def link_io_pin(name, type_, nr, board):
+        def link_io_pin(name, type_, nr_, board):
             pin = PinGroup(name)
             pin.pin('is_output').set(type_ == hal.HAL_OUT)
             if type_ == hal.HAL_OUT:
                 pin.pin('invert_output').set(True)
             dir_ = 'out' if type_ == hal.HAL_OUT else 'in'
-            io_pins['{}-{}-{}'.format(board, dir_, nr)] = pin
+            io_pins['{}-{}-{}'.format(board, dir_, nr_)] = pin
 
         # i/o pins
         for nr, i in enumerate(range(16)):
