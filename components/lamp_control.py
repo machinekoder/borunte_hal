@@ -15,8 +15,8 @@ class LampControlComponent(object):
         self._estop_active_pin = self._comp.newpin(
             'estop-active', hal.HAL_BIT, hal.HAL_IN
         )
-        self._power_enable_pin = self._comp.newpin(
-            'power-enable', hal.HAL_BIT, hal.HAL_IN
+        self._power_on_pin = self._comp.newpin(
+            'power-on', hal.HAL_BIT, hal.HAL_IN
         )
         self._blink_interval_pin = self._comp.newpin(
             'blink-interval', hal.HAL_FLOAT, hal.HAL_IN
@@ -30,7 +30,7 @@ class LampControlComponent(object):
         self._comp.ready()
 
         self._estop_active_pin.set(False)
-        self._power_enable_pin.set(False)
+        self._power_on_pin.set(False)
         self._blink_interval_pin.set(0.5)
 
         self._on_off = True
@@ -49,7 +49,7 @@ class LampControlComponent(object):
                 self._lamp_yellow_pin.set(False)
                 self._signal_pin.set(self._on_off)
 
-            elif self._power_enable_pin.get():
+            elif self._power_on_pin.get():
                 self._lamp_green_pin.set(False)
                 self._lamp_red_pin.set(False)
                 self._lamp_yellow_pin.set(True)

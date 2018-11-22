@@ -72,7 +72,7 @@ class BorunteConfig(object):
             wait_name=name,
         )
         lamp = hal.components['lamp-control']
-        lamp.pin('power-enable').link('power-enable')
+        lamp.pin('power-on').link('power-on')
         lamp.pin('estop-active').link('estop-active')
         lamp.pin('blink-interval').set(blink_interval_s)
         lamp.pin('lamp-red').link('lamp-red')
@@ -84,7 +84,7 @@ class BorunteConfig(object):
 
     @staticmethod
     def _setup_usrcomp_watchdog(comps, thread):
-        power_enable = hal.Signal('power-enable', hal.HAL_BIT)
+        power_on = hal.Signal('power-on', hal.HAL_BIT)
         watchdog_ok = hal.Signal('watchdog-ok', hal.HAL_BIT)
         watchdog_error = hal.Signal('watchdog-error', hal.HAL_BIT)
 
@@ -96,7 +96,7 @@ class BorunteConfig(object):
             hal.Pin('{}.watchdog'.format(comp.name)).link(sig_in)
             watchdog.pin('input-{:02}'.format(n)).link(sig_in)
             watchdog.pin('timeout-{:02}'.format(n)).set(comp.timeout)
-        watchdog.pin('enable-in').link(power_enable)
+        watchdog.pin('enable-in').link(power_on)
         watchdog.pin('ok-out').link(watchdog_ok)
 
         not_comp = rt.newinst('not', 'not-watchdog-error')
@@ -112,7 +112,7 @@ class BorunteConfig(object):
             hal.Signal('drive-alarm-{}'.format(i), hal.HAL_BIT)
         hal.Signal('estop-in', hal.HAL_BIT)
         hal.Signal('estop-active', hal.HAL_BIT)
-        hal.Signal('power-enable', hal.HAL_BIT)
+        hal.Signal('power-on', hal.HAL_BIT)
         hal.Signal('lamp-red', hal.HAL_BIT)
         hal.Signal('lamp-green', hal.HAL_BIT)
         hal.Signal('lamp-yellow', hal.HAL_BIT)
