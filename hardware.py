@@ -87,6 +87,7 @@ class Hardware(object):
             # setup limits
             hal.Signal('joint-{}-limit-min'.format(i)).set(c['min_limit_rad'])
             hal.Signal('joint-{}-limit-max'.format(i)).set(c['max_limit_rad'])
+            hal.Signal('joint-{}-ferror-max'.format(i)).set(c['max_ferror_rad'])
 
         # set rs-485 tx enable pins
         tx0_en = PinGroup('hm2_7i80.0.gpio.071')

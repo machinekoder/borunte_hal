@@ -84,12 +84,14 @@ def setup_joint_offset(nr, thread):
     not_son.pin('in').link(son)
     not_son.pin('out').link(son_not)
 
+    # setup min/max joint limits
     limit = rt.newinst('limit1v2', 'limit-joint-{}'.format(nr))
     limit.pin('min').link(limit_min)
     limit.pin('max').link(limit_max)
     limit.pin('in').link(cmd_pos)
     limit.pin('out').link(cmd_in_pos)
 
+    # connect functions in correct order
     hal.addf('{}.update-feedback'.format(offset.name), thread.name)
     hal.addf(not_son.name, thread.name)
     hal.addf(abs_joint.name, thread.name)
@@ -97,9 +99,38 @@ def setup_joint_offset(nr, thread):
     hal.addf('{}.update-output'.format(offset.name), thread.name)
 
 
-def setup_joint_offsets(thread):
+def setup_joint_ferror(nr, thread):
+    cmd_fb_pos = hal.Signal('joint-{}-cmd-fb-pos'.format(nr), hal.HAL_FLOAT)
+    fb_in_pos = hal.Signal('joint-{}-fb-in-pos'.format(nr), hal.HAL_FLOAT)
+    ferror = hal.Signal('joint-{}-ferror'.format(nr), hal.HAL_FLOAT)
+    ferror_abs = hal.Signal('joint-{}-ferror-abs'.format(nr), hal.HAL_FLOAT)
+    ferror_max = hal.Signal('joint-{}-ferror-max'.format(nr), hal.HAL_FLOAT)
+    ferror_active = hal.Signal('joint-{}-ferror-active'.format(nr), hal.HAL_BIT)
+
+    sum_ferror = rt.newinst('sum2v2', 'sum2-joint-{}-ferror'.format(nr))
+    sum_ferror.pin('in0').link(cmd_fb_pos)
+    sum_ferror.pin('in1').link(fb_in_pos)
+    sum_ferror.pin('gain1').set(-1.0)
+    sum_ferror.pin('out').link(ferror)
+
+    abs_ferror = rt.newinst('absv2', 'abs-joint-{}-ferror'.format(nr))
+    abs_ferror.pin('in').link(ferror)
+    abs_ferror.pin('out').link(ferror_abs)
+
+    comp = rt.newinst('compv2', 'comp-joint-{}-ferror'.format(nr))
+    comp.pin('in0').link(ferror_max)
+    comp.pin('in1').link(ferror_abs)
+    comp.pin('out').link(ferror_active)
+
+    hal.addf(sum_ferror.name, thread.name)
+    hal.addf(abs_ferror.name, thread.name)
+    hal.addf(comp.name, thread.name)
+
+
+def setup_joints(thread):
     for nr in range(1, NUM_JOINTS + 1):
         setup_joint_offset(nr=nr, thread=thread)
+        setup_joint_ferror(nr=nr, thread=thread)
 
 
 def create_joint_plumbing():
@@ -118,7 +149,7 @@ def main():
     hardware.read()
 
     create_signals()
-    setup_joint_offsets(thread=MAIN_THREAD)
+    setup_joints(thread=MAIN_THREAD)
     hardware.setup()
 
     hardware.write()

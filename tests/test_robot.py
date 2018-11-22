@@ -9,7 +9,7 @@ from machinekit import hal
 from machinekit import rtapi as rt
 
 setattr(sys, 'testing', True)
-from robot import setup_joint_offset
+from robot import setup_joint_offset, setup_joint_ferror
 
 WAIT_TIME_S = 0.1
 
@@ -24,12 +24,16 @@ def joint_offsets(hal_config):
         fb_out_pos = hal.Signal('joint-{}-fb-out-pos'.format(nr), hal.HAL_FLOAT)
         fb_in_pos = hal.Signal('joint-{}-fb-in-pos'.format(nr), hal.HAL_FLOAT)
         cmd_pos = hal.Signal('joint-{}-cmd-pos'.format(nr), hal.HAL_FLOAT)
+        cmd_fb_pos = hal.Signal('joint-{}-cmd-fb-pos'.format(nr), hal.HAL_FLOAT)
         cmd_in_pos = hal.Signal('joint-{}-cmd-in-pos'.format(nr), hal.HAL_FLOAT)
         cmd_out_pos = hal.Signal('joint-{}-cmd-out-pos'.format(nr), hal.HAL_FLOAT)
         pos_offset = hal.Signal('joint-{}-pos-offset'.format(nr), hal.HAL_FLOAT)
         limit_min = hal.Signal('joint-{}-limit-min'.format(nr), hal.HAL_FLOAT)
         limit_max = hal.Signal('joint-{}-limit-max'.format(nr), hal.HAL_FLOAT)
         son = hal.Signal('son-{}'.format(nr), hal.HAL_BIT)
+
+        ferror_max = hal.Signal('joint-{}-ferror-max'.format(nr), hal.HAL_FLOAT)
+        ferror_active = hal.Signal('joint-{}-ferror-active'.format(nr), hal.HAL_BIT)
 
         def __init__(self):
             setup_joint_offset(nr, hal_config.thread)
@@ -41,6 +45,24 @@ def joint_offsets(hal_config):
             sum2.pin('out').link(self.fb_in_pos)
 
     return Offsets()
+
+
+@pytest.fixture()
+def joint_ferror(hal_config):
+    nr = str(uuid4())[:8]
+
+    class Ferror(object):
+        cmd_fb_pos = hal.Signal('joint-{}-cmd-fb-pos'.format(nr), hal.HAL_FLOAT)
+        fb_in_pos = hal.Signal('joint-{}-fb-in-pos'.format(nr), hal.HAL_FLOAT)
+        ferror = hal.Signal('joint-{}-ferror'.format(nr), hal.HAL_FLOAT)
+        ferror_abs = hal.Signal('joint-{}-ferror-abs'.format(nr), hal.HAL_FLOAT)
+        ferror_max = hal.Signal('joint-{}-ferror-max'.format(nr), hal.HAL_FLOAT)
+        ferror_active = hal.Signal('joint-{}-ferror-active'.format(nr), hal.HAL_BIT)
+
+        def __init__(self):
+            setup_joint_ferror(nr, hal_config.thread)
+
+    return Ferror()
 
 
 def test_cmd_pos_is_reset_after_son(joint_offsets):
@@ -69,3 +91,20 @@ def test_joint_limits_are_enforced(joint_offsets):
 
     time.sleep(WAIT_TIME_S)
     assert joint_offsets.cmd_in_pos.get() == pytest.approx(399.94)
+
+
+def test_ferror_becomes_active_when_ferror_greater_than_max(joint_ferror):
+    joint_ferror.ferror_max.set(1.0)
+    assert not joint_ferror.ferror_active.get()
+
+    joint_ferror.cmd_fb_pos.set(10.0)
+    time.sleep(WAIT_TIME_S)
+    assert joint_ferror.ferror_active.get()
+
+    joint_ferror.cmd_fb_pos.set(0.0)
+    time.sleep(WAIT_TIME_S)
+    assert not joint_ferror.ferror_active.get()
+
+    joint_ferror.cmd_fb_pos.set(-2.4)
+    time.sleep(WAIT_TIME_S)
+    assert joint_ferror.ferror_active.get()
