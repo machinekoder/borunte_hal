@@ -11,6 +11,7 @@ class Hardware(object):
     def __init__(self, thread):
         self.thread = thread
         self.user_comps = []
+        self.error_signals = []
 
         self._init_stepgens()
         self._init_encoders()
@@ -23,6 +24,7 @@ class Hardware(object):
     def setup(self):
         self._setup_brakes()
         self._setup_stepgens()
+        self._setup_estop()
 
     def write(self):
         hal.addf('stepgen.make-pulses', self.thread.name)
@@ -35,7 +37,7 @@ class Hardware(object):
         for i in range(1, NUM_JOINTS + 1):
             nr = 6 - i
             stepgen = PinGroup('stepgen.{}'.format(nr))
-            stepgen.pin('enable').link('son-{}'.format(i))
+            stepgen.pin('enable').link('son-{}-out'.format(i))
 
     def _init_encoders(self):
         rt.loadrt('encoder', num_chan=NUM_JOINTS)
@@ -43,7 +45,13 @@ class Hardware(object):
     def _setup_brakes(self):
         # pass through SON to brake disable signal
         for i in range(1, NUM_JOINTS + 1):
-            or2 = rt.newinst('or2', 'or2-brake-release-{}'.format(i))
+            or2 = rt.newinst('or2v2', 'or2-brake-release-{}'.format(i))
             hal.addf(or2.name, self.thread.name)
-            or2.pin('in0').link('son-{}'.format(i))
+            or2.pin('in0').link('son-{}-out'.format(i))
             or2.pin('out').link('brake-release-{}'.format(i))
+
+    def _setup_estop(self):
+        or2 = rt.newinst('or2v2', 'or2-estop-in')
+        hal.addf(or2.name, self.thread.name)
+        or2.pin('in0').set(True)
+        or2.pin('out').link('estop-in')

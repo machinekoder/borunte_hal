@@ -20,6 +20,7 @@ class Hardware(object):
         self.thread = thread
         self._io_pins = {}
         self.user_comps = []
+        self.error_signals = []
 
         self._init_hm2()
         self._init_modbus()
@@ -41,6 +42,11 @@ class Hardware(object):
             wait_name='i620p-abs',
         )
         self.user_comps.append(UserComp(name=name, timeout=(interval_s * 2.0)))
+
+        comp = hal.components[name]
+        error = hal.Signal('i620p-abs-error', hal.HAL_BIT)
+        comp.pin('error').link(error)
+        self.error_signals.append(error)
 
     def read(self):
         hal.addf('hm2_7i80.0.read', self.thread.name)
@@ -78,12 +84,13 @@ class Hardware(object):
             stepgen.pin('position-scale').set(scale)
             stepgen.pin('maxvel').set(c['max_vel_rad_s'] / 10)
             stepgen.pin('maxaccel').set(c['max_accel_rad_s2'] / 10)
-            stepgen.pin('enable').link('son-{}'.format(i))
+            stepgen.pin('enable').link('son-{}-out'.format(i))
             stepgen.pin('position-cmd').link('joint-{}-cmd-out-pos'.format(i))
+            stepgen.pin('position-fb').link('joint-{}-cmd-fb-pos'.format(i))
 
             # encoder
             encoder = PinGroup('hm2_7i80.0.encoder.{:02}'.format(nr))
-            encoder.pin('index-enable').set(False)
+            encoder.pin('index-enable').set(True)
             encoder.pin('filter').set(True)  # use 15 clocks to register change
             encoder.pin('scale').set(-scale)
             encoder.pin('position').link('joint-{}-fb-in-pos'.format(i))
@@ -141,14 +148,13 @@ class Hardware(object):
             Brake(input='io2-in-14', output='io1-out-4'),
         )
         for i, brake in enumerate(brakes):
-            brake_signal = hal.Signal('brake-release-{}'.format(i + 1), hal.HAL_BIT)
-            brake_signal.link(self._io_pins[brake.input].pin('in_not'))
-            brake_signal.link(self._io_pins[brake.output].pin('out'))
+            self._io_pins[brake.input].pin('in_not').link('brake-release-{}'.format(i + 1))
+            self._io_pins[brake.output].pin('out').link('brake-release-{}-out'.format(i + 1))
 
     def _setup_servo_on(self):
         for i in range(NUM_JOINTS):
             self._io_pins['io2-out-{}'.format(5 - i)].pin('out').link(
-                'son-{}'.format(i + 1)
+                'son-{}-out'.format(i + 1)
             )
 
     def _setup_drive_alarm(self):
@@ -170,4 +176,4 @@ class Hardware(object):
         self._io_pins['io1-out-3'].pin('out').link('lamp-signal')
 
     def _setup_estop(self):
-        self._io_pins['io1-in-14'].pin('in').link('estop')  # true is estop active
+        self._io_pins['io1-in-14'].pin('in_not').link('estop-in')  # true is estop active

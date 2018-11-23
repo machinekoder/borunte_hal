@@ -40,6 +40,9 @@ class BorunteConfig(object):
         self._setup_usrcomp_watchdog(
             comps=self.user_comps + self.hardware.user_comps, thread=MAIN_THREAD
         )
+        self._setup_estop(thread=MAIN_THREAD)
+        self._setup_drive_safety_signals(thread=MAIN_THREAD)
+        self._setup_power_enable(thread=MAIN_THREAD)
 
         self.hardware.write()
 
@@ -71,7 +74,7 @@ class BorunteConfig(object):
             './components/lamp_control.py -n {} -i {}'.format(name, interval_s),
             wait_name=name,
         )
-        lamp = hal.components['lamp-control']
+        lamp = hal.components[name]
         lamp.pin('power-on').link('power-on')
         lamp.pin('estop-active').link('estop-active')
         lamp.pin('blink-interval').set(blink_interval_s)
@@ -86,6 +89,7 @@ class BorunteConfig(object):
     def _setup_usrcomp_watchdog(comps, thread):
         power_on = hal.Signal('power-on', hal.HAL_BIT)
         watchdog_ok = hal.Signal('watchdog-ok', hal.HAL_BIT)
+        watchdog_error_raw = hal.Signal('watchdog-error-raw', hal.HAL_BIT)
         watchdog_error = hal.Signal('watchdog-error', hal.HAL_BIT)
 
         watchdog = rt.newinst('watchdog', 'watchdog-usrcomp', pincount=len(comps))
@@ -102,13 +106,75 @@ class BorunteConfig(object):
         not_comp = rt.newinst('not', 'not-watchdog-error')
         hal.addf(not_comp.name, thread.name)
         not_comp.pin('in').link(watchdog_ok)
-        not_comp.pin('out').link(watchdog_error)
+        not_comp.pin('out').link(watchdog_error_raw)
+
+        and2 = rt.newinst('and2', 'and2-watchdog-error')
+        hal.addf(and2.name, thread.name)
+        and2.pin('in0').link(watchdog_error_raw)
+        and2.pin('in1').link(power_on)
+        and2.pin('out').link(watchdog_error)
+
+    @staticmethod
+    def _setup_estop_chain(error_signals, thread):
+        power_on = hal.Signal('power-on', hal.HAL_BIT)
+        estop_active = hal.Signal('estop-active', hal.HAL_BIT)
+        estop_error = hal.Signal('estop-error', hal.HAL_BIT)
+        estop_in = hal.Signal('estop-in', hal.HAL_BIT)
+        ok = hal.Signal('ok', hal.HAL_BIT)
+
+        num = len(error_signals)
+        or_comp = rt.newinst('orn', 'or{}-estop-error'.format(num), pincount=num)
+        hal.addf(or_comp.name, thread.name)
+        for n, sig in enumerate(error_signals):
+            or_comp.pin('in{}'.format(n)).link(sig)
+        or_comp.pin('out').link(estop_error)
+
+        estop_latch = rt.newinst('estop_latch', 'estop-latch')
+        hal.addf(estop_latch.name, thread.name)
+        estop_latch.pin('ok-in').link(estop_in)
+        estop_latch.pin('fault-in').link(estop_error)
+        estop_latch.pin('fault-out').link(estop_active)
+        estop_latch.pin('reset').link(power_on)
+        estop_latch.pin('ok-out').link(ok)
+
+    def _setup_estop(self, thread):
+        error_signals = ['watchdog-error']
+        for i in range(1, NUM_JOINTS + 1):
+            error_signals.append('drive-alarm-{}'.format(i))
+            error_signals.append('joint-{}-ferror-active'.format(i))
+        error_signals += self.hardware.error_signals
+        self._setup_estop_chain(error_signals, thread)
+
+    @staticmethod
+    def _setup_drive_safety_signals(thread):
+        for i in range(1, NUM_JOINTS + 1):
+            and2_son = rt.newinst('and2v2', 'and2-son-{}'.format(i))
+            hal.addf(and2_son.name, thread.name)
+            and2_son.pin('in0').link('son-{}'.format(i))
+            and2_son.pin('in1').link('ok')
+            and2_son.pin('out').link('son-{}-out'.format(i))
+
+            and2_brake = rt.newinst('and2v2', 'and2-brake-release-{}'.format(i))
+            hal.addf(and2_brake.name, thread.name)
+            and2_brake.pin('in0').link('brake-release-{}'.format(i))
+            and2_brake.pin('in1').link('ok')
+            and2_brake.pin('out').link('brake-release-{}-out'.format(i))
+
+    @staticmethod
+    def _setup_power_enable(thread):
+        for i in range(1, NUM_JOINTS + 1):
+            or1 = rt.newinst('ornv2', 'pass-son-{}'.format(i), pincount=1)
+            hal.addf(or1.name, thread.name)
+            or1.pin('in0').link('power-on')
+            or1.pin('out').link('son-{}'.format(i))
 
     @staticmethod
     def _create_signals():
         for i in range(1, NUM_JOINTS + 1):
             hal.Signal('son-{}'.format(i), hal.HAL_BIT)
+            hal.Signal('son-{}-out'.format(i), hal.HAL_BIT)
             hal.Signal('brake-release-{}'.format(i), hal.HAL_BIT)
+            hal.Signal('brake-release-{}-out'.format(i), hal.HAL_BIT)
             hal.Signal('drive-alarm-{}'.format(i), hal.HAL_BIT)
         hal.Signal('estop-in', hal.HAL_BIT)
         hal.Signal('estop-active', hal.HAL_BIT)
