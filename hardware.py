@@ -70,7 +70,7 @@ class Hardware(object):
 
         for i in range(1, NUM_JOINTS + 1):
             c = config['joint_{}'.format(i)]
-            scale = c['gear_ratio'] * c['steps_per_rev'] / pi
+            scale = c['gear_ratio'] * c['steps_per_rev'] / (2.0 * pi)
             nr = 6 - i
 
             # stepgen
