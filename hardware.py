@@ -8,6 +8,7 @@ from machinekit import rtapi as rt
 
 from utils import HalThread, PinGroup, UserComp
 
+JOINT_CONFIG = 'joint_config.yml'
 MESA_BOARD_IP = '192.168.1.121'
 NUM_JOINTS = 6
 
@@ -31,6 +32,10 @@ class Hardware(object):
             'hm2_eth', board_ip=MESA_BOARD_IP, config='"num_encoders=6,num_stepgens=6"'
         )
         hal.Pin('hm2_7i80.0.watchdog.timeout_ns').set(int(self.thread.period_ns * 2))
+
+        hw_watchdog_signal = hal.Signal('hardware-watchdog', hal.HAL_BIT)
+        hal.Pin('hm2_7i80.0.watchdog.has_bit').link(hw_watchdog_signal)
+        self.error_signals.append(hw_watchdog_signal)
 
     def _init_modbus(self):
         name = 'i620p-abs'
@@ -65,7 +70,7 @@ class Hardware(object):
         hal.addf('hm2_7i80.0.write', self.thread.name)
 
     def _setup_joints(self):
-        with open('motor_config.yml', 'r') as f:
+        with open(JOINT_CONFIG, 'r') as f:
             config = yaml.safe_load(f)
 
         for i in range(1, NUM_JOINTS + 1):
