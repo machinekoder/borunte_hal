@@ -46,7 +46,7 @@ class BorunteConfig(object):
 
         self.hardware.write()
 
-        # self._create_io_remote_component()
+        self._create_control_remote_component()
 
     @staticmethod
     def _setup_threads():
@@ -54,17 +54,14 @@ class BorunteConfig(object):
         rt.newthread(MAIN_THREAD.name, MAIN_THREAD.period_ns, fp=True)
 
     @staticmethod
-    def _create_io_remote_component():
+    def _create_control_remote_component():
         control = hal.RemoteComponent('control', timer=100)
-        control.newpin('watchdog_has_bit', hal.HAL_BIT, hal.HAL_IO)
-        for board in ('io1', 'io2'):
-            for i in range(0, 16):
-                control.newpin('{}.in-{}'.format(board, i), hal.HAL_BIT, hal.HAL_IN)
-            for i in range(0, 8):
-                control.newpin('{}.out-{}'.format(board, i), hal.HAL_BIT, hal.HAL_OUT)
+        control.newpin('power-on', hal.HAL_BIT, hal.HAL_IO)
+        control.newpin('estop-active', hal.HAL_BIT, hal.HAL_IN)
         control.ready()
 
-        control.pin('watchdog_has_bit').link('hm2_7i80.0.watchdog.has_bit')
+        control.pin('power-on').link('power-on')
+        control.pin('estop-active').link('estop-active')
 
     def _create_lamp_control(self):
         blink_interval_s = 0.5
