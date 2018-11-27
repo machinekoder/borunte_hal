@@ -90,7 +90,7 @@ class BorunteConfig(object):
         watchdog_error_raw = hal.Signal('watchdog-error-raw', hal.HAL_BIT)
         watchdog_error = hal.Signal('watchdog-error', hal.HAL_BIT)
 
-        watchdog = rt.newinst('watchdog', 'watchdog-usrcomp', pincount=len(comps))
+        watchdog = rt.newinst('watchdogv2', 'watchdog-usrcomp', pincount=len(comps))
         hal.addf('{}.set-timeouts'.format(watchdog.name), thread.name)
         hal.addf('{}.process'.format(watchdog.name), thread.name)
         for n, comp in enumerate(comps):
@@ -98,10 +98,10 @@ class BorunteConfig(object):
             hal.Pin('{}.watchdog'.format(comp.name)).link(sig_in)
             watchdog.pin('input-{:02}'.format(n)).link(sig_in)
             watchdog.pin('timeout-{:02}'.format(n)).set(comp.timeout)
-        watchdog.pin('enable-in').link(power_on)
+        watchdog.pin('enable').link(power_on)
         watchdog.pin('ok-out').link(watchdog_ok)
 
-        not_comp = rt.newinst('not', 'not-watchdog-error')
+        not_comp = rt.newinst('notv2', 'not-watchdog-error')
         hal.addf(not_comp.name, thread.name)
         not_comp.pin('in').link(watchdog_ok)
         not_comp.pin('out').link(watchdog_error_raw)
