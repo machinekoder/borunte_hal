@@ -81,7 +81,7 @@ class BorunteConfig(object):
         lamp.pin('lamp-yellow').link('lamp-yellow')
         lamp.pin('signal').link('lamp-signal')
 
-        self.user_comps.append(UserComp(name=name, timeout=(interval_s * 2)))
+        self.user_comps.append(UserComp(name=name, timeout=(interval_s * 2.5)))
 
     @staticmethod
     def _setup_usrcomp_watchdog(comps, thread):

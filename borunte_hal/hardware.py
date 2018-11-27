@@ -46,7 +46,7 @@ class Hardware(object):
             ),
             wait_name='i620p-abs',
         )
-        self.user_comps.append(UserComp(name=name, timeout=(interval_s * 2.0)))
+        self.user_comps.append(UserComp(name=name, timeout=(interval_s * 2.5)))
 
         comp = hal.components[name]
         error = hal.Signal('i620p-abs-error', hal.HAL_BIT)
