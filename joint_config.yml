@@ -9,7 +9,7 @@ joint_1:
   max_accel_rad_s2: 31.4
   min_limit_rad: -2.967
   max_limit_rad: 2.967
-  home_pos: 1029.4025
+  home_pos: 4117.61
   max_ferror_rad: 0.1
 
 joint_2:
@@ -23,7 +23,7 @@ joint_2:
   max_accel_rad_s2: 20.9
   min_limit_rad: -1.571
   max_limit_rad: 1.571
-  home_pos: -0.09926335
+  home_pos: -0.2642582
   max_ferror_rad: 0.1
 
 joint_3:
@@ -37,7 +37,7 @@ joint_3:
   max_accel_rad_s2: 26.2
   min_limit_rad: -1.571
   max_limit_rad: 1.222
-  home_pos: 1019.2815
+  home_pos: 4077.126
   max_ferror_rad: 0.1
 
 joint_4:
@@ -51,7 +51,7 @@ joint_4:
   max_accel_rad_s2: 39.3
   min_limit_rad: -1.571
   max_limit_rad: 1.571
-  home_pos: 1286.792
+  home_pos: 5147.168
   max_ferror_rad: 0.1
 
 joint_5:
@@ -65,7 +65,7 @@ joint_5:
   max_accel_rad_s2: 47.1
   min_limit_rad: -1.571
   max_limit_rad: 1.571
-  home_pos: -0.07950075
+  home_pos: -0.3070014
   max_ferror_rad: 0.1
 
 joint_6:
@@ -79,5 +79,5 @@ joint_6:
   max_accel_rad_s2: 47.1
   min_limit_rad: -6.283
   max_limit_rad: 6.283
-  home_pos: 2044.5425
+  home_pos: 8178.17
   max_ferror_rad: 0.1
