@@ -9,7 +9,7 @@ from machinekit import hal
 from machinekit import rtapi as rt
 
 setattr(sys, 'testing', True)
-from robot import BorunteConfig
+from borunte_hal.robot import BorunteConfig
 
 WAIT_TIME_S = 0.1
 

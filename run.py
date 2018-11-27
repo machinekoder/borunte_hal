@@ -6,8 +6,9 @@ import os
 import argparse
 import time
 from machinekit import launcher
+from machinekit import config
 
-from mesahandler import MesaHandler
+from borunte_hal.mesahandler import MesaHandler
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
@@ -30,6 +31,7 @@ def main():
 
     if args.sim:
         os.environ['SIM_MODE'] = '1'
+    os.environ['MACHINEKIT_INI'] = config.MACHINEKIT_INI
 
     try:
         launcher.check_installation()
@@ -45,7 +47,7 @@ def main():
                 device='7I80', address='192.168.1.121', firmware='FPGAFILE.BIT'
             )
             mesahandler.load_mesacard()
-        launcher.load_hal_file('robot.py')  # load the main HAL file
+        launcher.load_hal_file('hal.py')  # load the main HAL file
         # enable on ctrl-C, needs to executed after HAL files
         launcher.register_exit_handler()
 

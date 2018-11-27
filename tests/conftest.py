@@ -1,7 +1,7 @@
 # coding=utf-8
 import os
 from collections import namedtuple
-from utils import HalThread
+from borunte_hal.utils import HalThread
 
 import pytest
 

@@ -2,13 +2,15 @@
 from __future__ import division
 
 import os
-import sys
 from machinekit import hal
 from machinekit import rtapi as rt
 
 from utils import HalThread, UserComp
 
 SIM_MODE = bool(os.environ.get('SIM_MODE', 0))
+COMPONENT_PATH = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), '../components'
+)
 MAIN_THREAD = HalThread(name='main_thread', period_ns=1e8)
 NUM_JOINTS = 6
 
@@ -68,8 +70,7 @@ class BorunteConfig(object):
         interval_s = 0.1
         name = 'lamp-control'
         hal.loadusr(
-            './components/lamp_control.py -n {} -i {}'.format(name, interval_s),
-            wait_name=name,
+            'lamp_control.py -n {} -i {}'.format(name, interval_s), wait_name=name
         )
         lamp = hal.components[name]
         lamp.pin('power-on').link('power-on')
@@ -159,7 +160,7 @@ class BorunteConfig(object):
 
     @staticmethod
     def _setup_power_enable(thread):
-        for i in range(1, NUM_JOINTS + 1):
+        for i in (2,):  # range(1, NUM_JOINTS + 1):
             or1 = rt.newinst('ornv2', 'pass-son-{}'.format(i), pincount=1)
             hal.addf(or1.name, thread.name)
             or1.pin('in0').link('power-on')
@@ -265,7 +266,9 @@ class BorunteConfig(object):
             self._setup_joint_ferror(nr=nr, thread=thread)
 
 
-def main():
+def configure_hal():
+    os.environ['PATH'] = '{}:{}'.format(os.environ['PATH'], COMPONENT_PATH)
+
     config = BorunteConfig()
     config.init()
     config.setup()
@@ -273,8 +276,4 @@ def main():
     # ready to start the threads
     hal.start_threads()
 
-    hal.loadusr('haltalk')
-
-
-if not getattr(sys, 'testing', False):
-    main()
+    hal.loadusr('haltalk', wait=True)
