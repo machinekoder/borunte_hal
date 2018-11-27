@@ -1,0 +1,32 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyClassicStyleClassInspection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyCompatibilityInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ourVersions">
+        <value>
+          <list size="2">
+            <item index="0" class="java.lang.String" itemvalue="2.7" />
+            <item index="1" class="java.lang.String" itemvalue="3.7" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyMandatoryEncodingInspection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="zmq.PUSH" />
+          <option value="fysom.Fysom.*" />
+          <option value="zmq.*" />
+          <option value="distutils.command.build_py.build_py_2to3" />
+          <option value="pymachinetalk.application.*" />
+          <option value="machinekit.rtapi.loadrt" />
+          <option value="machinekit.rtapi.newinst" />
+          <option value="machinekit.rtapi.delinst" />
+          <option value="machinekit.rtapi.newthread" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
