@@ -160,7 +160,7 @@ class BorunteConfig(object):
 
     @staticmethod
     def _setup_power_enable(thread):
-        for i in (2,):  # range(1, NUM_JOINTS + 1):
+        for i in range(1, NUM_JOINTS + 1):
             or1 = rt.newinst('ornv2', 'pass-son-{}'.format(i), pincount=1)
             hal.addf(or1.name, thread.name)
             or1.pin('in0').link('power-on')
