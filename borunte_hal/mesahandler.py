@@ -12,8 +12,7 @@ class MesaHandler(object):
         self._address = address
         self._firmware = firmware
         self._timeout = 3.0
-        self._mesaflash_cmd = 'mesaflash --device %s --addr %s' % (
-            device, address)
+        self._mesaflash_cmd = 'mesaflash --device %s --addr %s' % (device, address)
 
         self._check_firmware_exists(firmware)
         # we could check here if the ip address and network config is sane
@@ -35,8 +34,9 @@ class MesaHandler(object):
         self.reload()
 
     def flash(self):
-        launcher.check_process('%s --write %s --fix-boot-block' %
-                               (self._mesaflash_cmd, self._firmware))
+        launcher.check_process(
+            '%s --write %s --fix-boot-block' % (self._mesaflash_cmd, self._firmware)
+        )
         for i in range(5):
             if self.ping():
                 time.sleep(1.0)  # additional grace period
@@ -45,8 +45,9 @@ class MesaHandler(object):
 
     def verify(self):
         try:
-            launcher.check_process('%s --verify %s' %
-                                   (self._mesaflash_cmd, self._firmware))
+            launcher.check_process(
+                '%s --verify %s' % (self._mesaflash_cmd, self._firmware)
+            )
         except subprocess.CalledProcessError:
             return False
         return True
@@ -61,5 +62,6 @@ class MesaHandler(object):
     def ping(self, timeout=1):
         sys.stdout.write('pinging %s\n' % self._address)
         response = os.system(
-            "ping -c 1 -W%i %s > /dev/null 2>&1" % (timeout, self._address))
+            "ping -c 1 -W%i %s > /dev/null 2>&1" % (timeout, self._address)
+        )
         return response == 0
