@@ -5,7 +5,7 @@ import os
 from machinekit import hal
 from machinekit import rtapi as rt
 
-from utils import HalThread, UserComp
+from .utils import HalThread, UserComp
 
 SIM_MODE = bool(os.environ.get('SIM_MODE', 0))
 COMPONENT_PATH = os.path.join(
