@@ -5,8 +5,9 @@ from math import pi
 
 import yaml
 
+from .constants import JOINT_CONFIG_FILE
+
 NUM_JOINTS = 6
-JOINT_CONFIG = 'joint_config.yml'
 
 
 class Hardware(object):
@@ -34,7 +35,7 @@ class Hardware(object):
             hal.addf('stepgen-{}.write'.format(i), self.thread.name)
 
     def _setup_joints(self):
-        with open(JOINT_CONFIG, 'r') as f:
+        with open(JOINT_CONFIG_FILE, 'r') as f:
             config = yaml.safe_load(f)
 
         for i in range(1, NUM_JOINTS + 1):

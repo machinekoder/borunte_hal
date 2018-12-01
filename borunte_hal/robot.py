@@ -6,12 +6,9 @@ from machinekit import hal
 from machinekit import rtapi as rt
 
 from .utils import HalThread, UserComp
+from .constants import COMPONENT_PATH
 
 SIM_MODE = bool(os.environ.get('SIM_MODE', 0))
-COMPONENT_PATH = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), '../components'
-)
-MAIN_THREAD = HalThread(name='main_thread', period_ns=1e8)
 NUM_JOINTS = 6
 
 

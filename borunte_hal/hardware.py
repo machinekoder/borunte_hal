@@ -8,8 +8,8 @@ from machinekit import rtapi as rt
 
 from .mesahandler import MesaHandler
 from .utils import HalThread, PinGroup, UserComp
+from .constants import JOINT_CONFIG_FILE, MESA_FIRMWARE_FILE
 
-JOINT_CONFIG = 'joint_config.yml'
 MESA_BOARD_IP = '192.168.1.121'
 NUM_JOINTS = 6
 
@@ -29,7 +29,7 @@ class Hardware(object):
 
     def _init_hm2(self):
         mesahandler = MesaHandler(
-            device='7I80', address='192.168.1.121', firmware='FPGAFILE.BIT'
+            device='7I80', address=MESA_BOARD_IP, firmware=MESA_FIRMWARE_FILE
         )
         mesahandler.load_mesacard()
 
@@ -74,7 +74,7 @@ class Hardware(object):
         hal.addf('hm2_7i80.0.write', self.thread.name)
 
     def _setup_joints(self):
-        with open(JOINT_CONFIG, 'r') as f:
+        with open(JOINT_CONFIG_FILE, 'r') as f:
             config = yaml.safe_load(f)
 
         for i in range(1, NUM_JOINTS + 1):
