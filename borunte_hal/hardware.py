@@ -47,9 +47,7 @@ class Hardware(object):
         name = 'i620p-abs'
         interval_s = 1.0
         hal.loadusr(
-            'i620p_modbus.py -c {} -n {} -i {}'.format(
-                NUM_JOINTS, name, interval_s
-            ),
+            'i620p_modbus.py -c {} -n {} -i {}'.format(NUM_JOINTS, name, interval_s),
             wait_name='i620p-abs',
         )
         self.user_comps.append(UserComp(name=name, timeout=(interval_s * 2.5)))
@@ -159,8 +157,12 @@ class Hardware(object):
             Brake(input='io2-in-14', output='io1-out-4'),
         )
         for i, brake in enumerate(brakes):
-            self._io_pins[brake.input].pin('in_not').link('brake-release-{}'.format(i + 1))
-            self._io_pins[brake.output].pin('out').link('brake-release-{}-out'.format(i + 1))
+            self._io_pins[brake.input].pin('in_not').link(
+                'brake-release-{}'.format(i + 1)
+            )
+            self._io_pins[brake.output].pin('out').link(
+                'brake-release-{}-out'.format(i + 1)
+            )
 
     def _setup_servo_on(self):
         for i in range(NUM_JOINTS):
@@ -184,7 +186,9 @@ class Hardware(object):
         self._io_pins['io1-out-0'].pin('out').link('lamp-red')
         self._io_pins['io1-out-1'].pin('out').link('lamp-yellow')
         self._io_pins['io1-out-2'].pin('out').link('lamp-green')
-        #self._io_pins['io1-out-3'].pin('out').link('lamp-signal')
+        # self._io_pins['io1-out-3'].pin('out').link('lamp-signal')
 
     def _setup_estop(self):
-        self._io_pins['io1-in-14'].pin('in_not').link('estop-in')  # true is estop active
+        self._io_pins['io1-in-14'].pin('in_not').link(
+            'estop-in'
+        )  # true is estop active
