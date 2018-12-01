@@ -19,38 +19,33 @@ else:
 
 
 class BorunteConfig(object):
-    def __init__(self):
+    def __init__(self, thread):
+        self.thread = thread
         self.hardware = None
         self.user_comps = []
 
     def init(self):
-        self.hardware = Hardware(thread=MAIN_THREAD)
+        self.hardware = Hardware(thread=self.thread)
 
     def setup(self):
-        self._setup_threads()
-
         self.hardware.read()
 
         self._create_signals()
-        self._setup_joints(thread=MAIN_THREAD)
+        self._setup_joints(thread=self.thread)
         self._create_lamp_control()
         self.hardware.setup()
 
         self._setup_usrcomp_watchdog(
-            comps=self.user_comps + self.hardware.user_comps, thread=MAIN_THREAD
+            comps=self.user_comps + self.hardware.user_comps, thread=self.thread
         )
-        self._setup_estop(thread=MAIN_THREAD)
-        self._setup_drive_safety_signals(thread=MAIN_THREAD)
-        self._setup_power_enable(thread=MAIN_THREAD)
+        self._setup_estop(thread=self.thread)
+        self._setup_drive_safety_signals(thread=self.thread)
+        self._setup_power_enable(thread=self.thread)
 
         self.hardware.write()
 
         self._create_control_remote_component()
 
-    @staticmethod
-    def _setup_threads():
-        # read from IO
-        rt.newthread(MAIN_THREAD.name, MAIN_THREAD.period_ns, fp=True)
 
     @staticmethod
     def _create_control_remote_component():
@@ -263,10 +258,20 @@ class BorunteConfig(object):
             self._setup_joint_ferror(nr=nr, thread=thread)
 
 
-def configure_hal():
+def setup_thread(cgname=None):
+    thread_period = 1e8 if SIM_MODE else 1e6
+    thread = HalThread(name='main_thread', period_ns=thread_period)
+    kwargs = {}
+    if cgname and not SIM_MODE:
+        kwargs['cgname'] = cgname
+    rt.newthread(thread.name, thread.period_ns, fp=True, **kwargs)
+    return thread
+
+
+def configure_hal(thread):
     os.environ['PATH'] = '{}:{}'.format(os.environ['PATH'], COMPONENT_PATH)
 
-    config = BorunteConfig()
+    config = BorunteConfig(thread=thread)
     config.init()
     config.setup()
 
