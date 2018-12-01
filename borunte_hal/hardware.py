@@ -6,7 +6,8 @@ import yaml
 from machinekit import hal
 from machinekit import rtapi as rt
 
-from utils import HalThread, PinGroup, UserComp
+from .mesahandler import MesaHandler
+from .utils import HalThread, PinGroup, UserComp
 
 JOINT_CONFIG = 'joint_config.yml'
 MESA_BOARD_IP = '192.168.1.121'
@@ -27,6 +28,11 @@ class Hardware(object):
         self._init_modbus()
 
     def _init_hm2(self):
+        mesahandler = MesaHandler(
+            device='7I80', address='192.168.1.121', firmware='FPGAFILE.BIT'
+        )
+        mesahandler.load_mesacard()
+
         rt.loadrt('hostmot2')
         rt.loadrt(
             'hm2_eth', board_ip=MESA_BOARD_IP, config='"num_encoders=6,num_stepgens=6"'

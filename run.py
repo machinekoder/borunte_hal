@@ -8,8 +8,6 @@ import time
 from machinekit import launcher
 from machinekit import config
 
-from borunte_hal.mesahandler import MesaHandler
-
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 
@@ -42,12 +40,7 @@ def main():
         launcher.ensure_mklauncher()
         launcher.start_process('configserver -n Borunte-Tester .')
 
-        if not args.sim:
-            mesahandler = MesaHandler(
-                device='7I80', address='192.168.1.121', firmware='FPGAFILE.BIT'
-            )
-            mesahandler.load_mesacard()
-        launcher.load_hal_file('hal.py')  # load the main HAL file
+        launcher.load_hal_file('hal_config.py')  # load the main HAL file
         # enable on ctrl-C, needs to executed after HAL files
         launcher.register_exit_handler()
 
