@@ -42,10 +42,10 @@ def print_hex_reg(data):
 
 
 class RobotiqHandComponent(object):
-    def __init__(self, name, interval_s, usb_serial):
+    def __init__(self, name, interval_s, usb_serial_id):
         self.name = name
         self.interval_s = interval_s
-        self.usb_serial = usb_serial
+        self.usb_serial_id = usb_serial_id
 
         self._last_pos = 0
         self._client = None
@@ -81,7 +81,6 @@ class RobotiqHandComponent(object):
         self._comp = hal.component(self.name)
         self._error_pin = self._comp.newpin('error', hal.HAL_BIT, hal.HAL_OUT)
         self._watchdog_pin = self._comp.newpin('watchdog', hal.HAL_BIT, hal.HAL_OUT)
-        self._open_pin = self._comp.newpin('open', hal.HAL_BIT, hal.HAL_IN)
         self._position_pin = self._comp.newpin('position', hal.HAL_U32, hal.HAL_IN)
         self._velocity_pin = self._comp.newpin('velocity', hal.HAL_U32, hal.HAL_IN)
         self._force_pin = self._comp.newpin('force', hal.HAL_U32, hal.HAL_IN)
@@ -93,8 +92,9 @@ class RobotiqHandComponent(object):
         self._activated_pin = self._comp.newpin('activated', hal.HAL_BIT, hal.HAL_OUT)
         self._comp.ready()
 
-    def _create_action_byte(self, rACT, rGTO=0, rARD=0, rATR=0):
-        byte = rARD << 5 | rATR << 4 | rGTO << 3 | rACT << 0
+    @staticmethod
+    def _create_action_byte(r_act, r_gto=0, r_ard=0, r_atr=0):
+        byte = r_ard << 5 | r_atr << 4 | r_gto << 3 | r_act << 0
         return byte
 
     def _write_request(
@@ -125,12 +125,12 @@ class RobotiqHandComponent(object):
         position_request_echo = decoder.decode_8bit_uint()
         position = decoder.decode_8bit_uint()
         current = decoder.decode_8bit_uint()
-        gACT = gripper_status & 1
-        gGTO = gripper_status >> 3 & 1
-        gSTA = gripper_status >> 4 & 0x3
-        gOBJ = gripper_status >> 6 & 0x3
-        gFLT = fault_status & 0xF
-        kFLT = fault_status >> 4 & 0xF
+        g_act = gripper_status & 1
+        g_gto = gripper_status >> 3 & 1
+        g_sta = gripper_status >> 4 & 0x3
+        g_obj = gripper_status >> 6 & 0x3
+        g_flt = fault_status & 0xF
+        k_flt = fault_status >> 4 & 0xF
 
         logging.debug(
             'pos echo: {} pos: {} current: {}'.format(
@@ -139,24 +139,24 @@ class RobotiqHandComponent(object):
         )
         logging.debug(
             'gACT {}, gGTO {}, gSTA {}, gOBJ {}'.format(
-                hex(gACT), hex(gGTO), hex(gSTA), hex(gOBJ)
+                hex(g_act), hex(g_gto), hex(g_sta), hex(g_obj)
             )
         )
-        logging.debug('gFLT {} kFLT {}'.format(gFLT, kFLT))
+        logging.debug('gFLT {} kFLT {}'.format(g_flt, k_flt))
 
         self._position_fb_pin.set(position)
         self._current_pin.set(current)
-        self._activated_pin.set(gSTA == 0x3)
-        self._cmd_active_pin.set(gOBJ == 0x0 and gGTO == 0x1)
+        self._activated_pin.set(g_sta == 0x3)
+        self._cmd_active_pin.set(g_obj == 0x0 and g_gto == 0x1)
 
     def _init_gripper(self):
         rr = self._write_request(
-            action_byte=self._create_action_byte(rACT=0, rGTO=0, rATR=0, rARD=0)
+            action_byte=self._create_action_byte(r_act=0, r_gto=0, r_atr=0, r_ard=0)
         )
         if rr.isError():
             return False
         rr = self._write_request(
-            action_byte=self._create_action_byte(rACT=1, rGTO=0, rATR=0, rARD=0)
+            action_byte=self._create_action_byte(r_act=1, r_gto=0, r_atr=0, r_ard=0)
         )
         if rr.isError():
             return False
@@ -169,7 +169,7 @@ class RobotiqHandComponent(object):
         speed = min(self._velocity_pin.get(), 0xFF)
         force = min(self._force_pin.get(), 0xFF)
         rr = self._write_request(
-            action_byte=self._create_action_byte(rACT=1, rGTO=1),
+            action_byte=self._create_action_byte(r_act=1, r_gto=1),
             position_byte=pos,
             speed_byte=speed,
             force_byte=force,
@@ -207,13 +207,19 @@ def main():
     )
     parser.add_argument('-n', '--name', help='HAL component name', required=True)
     parser.add_argument('-i', '--interval', help='Update interval', default=0.1)
+    parser.add_argument(
+        '-s',
+        '--serial-id',
+        help='Serial ID of the USB-to-RS485 bridge device',
+        required=True,
+    )
     parser.add_argument('-d', '--debug', help='Enable debug info', action='store_true')
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
 
     comp = RobotiqHandComponent(
-        name=args.name, interval_s=float(args.interval), usb_serial=SERIAL_ID
+        name=args.name, interval_s=float(args.interval), usb_serial_id=args.serial_id
     )
 
     comp.start()

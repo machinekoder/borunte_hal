@@ -8,7 +8,8 @@ from machinekit import rtapi as rt
 
 from .mesahandler import MesaHandler
 from .utils import HalThread, PinGroup, UserComp
-from .constants import JOINT_CONFIG_FILE, MESA_FIRMWARE_FILE
+from .constants import JOINT_CONFIG_FILE, MESA_FIRMWARE_FILE, TIMEOUT_OVERHEAD
+
 
 MESA_BOARD_IP = '192.168.1.121'
 NUM_JOINTS = 6
@@ -26,6 +27,7 @@ class Hardware(object):
 
         self._init_hm2()
         self._init_modbus()
+        self._init_robotiq()
 
     def _init_hm2(self):
         mesahandler = MesaHandler(
@@ -50,10 +52,27 @@ class Hardware(object):
             'i620p_modbus.py -c {} -n {} -i {}'.format(NUM_JOINTS, name, interval_s),
             wait_name='i620p-abs',
         )
-        self.user_comps.append(UserComp(name=name, timeout=(interval_s * 2.5)))
+        self.user_comps.append(
+            UserComp(name=name, timeout=(interval_s * TIMEOUT_OVERHEAD))
+        )
 
         comp = hal.components[name]
-        error = hal.Signal('i620p-abs-error', hal.HAL_BIT)
+        error = hal.Signal('{}-error'.format(name), hal.HAL_BIT)
+        comp.pin('error').link(error)
+        self.error_signals.append(error)
+
+    def _init_robotiq(self):
+        name = 'robitiq-gripper'
+        interval_s = 0.1
+        hal.loadusr(
+            'robotiq_modbus.py -n {} -i {}'.format(name, interval_s), wait_name=name
+        )
+        self.user_comps.append(
+            UserComp(name=name, timeout=(interval_s * TIMEOUT_OVERHEAD))
+        )
+
+        comp = hal.components[name]
+        error = hal.Signal('{}-error'.format(name), hal.HAL_BIT)
         comp.pin('error').link(error)
         self.error_signals.append(error)
 
@@ -73,7 +92,8 @@ class Hardware(object):
         hal.addf('hm2_7i80.0.pet_watchdog', self.thread.name)
         hal.addf('hm2_7i80.0.write', self.thread.name)
 
-    def _setup_joints(self):
+    @staticmethod
+    def _setup_joints():
         with open(JOINT_CONFIG_FILE, 'r') as f:
             config = yaml.safe_load(f)
 

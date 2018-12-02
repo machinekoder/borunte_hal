@@ -6,7 +6,7 @@ from machinekit import hal
 from machinekit import rtapi as rt
 
 from .utils import HalThread, UserComp
-from .constants import COMPONENT_PATH
+from .constants import COMPONENT_PATH, TIMEOUT_OVERHEAD
 
 SIM_MODE = bool(os.environ.get('SIM_MODE', 0))
 NUM_JOINTS = 6
@@ -46,7 +46,6 @@ class BorunteConfig(object):
 
         self._create_control_remote_component()
 
-
     @staticmethod
     def _create_control_remote_component():
         control = hal.RemoteComponent('control', timer=100)
@@ -73,7 +72,9 @@ class BorunteConfig(object):
         lamp.pin('lamp-yellow').link('lamp-yellow')
         lamp.pin('signal').link('lamp-signal')
 
-        self.user_comps.append(UserComp(name=name, timeout=(interval_s * 2.5)))
+        self.user_comps.append(
+            UserComp(name=name, timeout=(interval_s * TIMEOUT_OVERHEAD))
+        )
 
     @staticmethod
     def _setup_usrcomp_watchdog(comps, thread):

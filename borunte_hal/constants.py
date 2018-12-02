@@ -6,3 +6,4 @@ CONFIG_PATH = os.path.join(_BASE_PATH, 'config')
 COMPONENT_PATH = os.path.join(_BASE_PATH, 'components')
 JOINT_CONFIG_FILE = os.path.join(CONFIG_PATH, 'joint_config.yml')
 MESA_FIRMWARE_FILE = os.path.join(CONFIG_PATH, 'FPGAFILE.bit')
+TIMEOUT_OVERHEAD = 2.5
