@@ -57,7 +57,9 @@ class Hardware(object):
             sum2 = rt.newinst('sum2v2', 'sum2-encoder-{}-fb'.format(nr))
             hal.addf(sum2.name, self.thread.name)
             sum2.pin('in0').link('joint-{}-cmd-fb-pos'.format(i))
-            sum2.pin('in1').set(0.0)  # can be used to set an artificial offset to trigger the alarm
+            sum2.pin('in1').set(
+                0.0
+            )  # can be used to set an artificial offset to trigger the alarm
             sum2.pin('out').link('joint-{}-fb-in-pos'.format(i))
 
             # encoder abs

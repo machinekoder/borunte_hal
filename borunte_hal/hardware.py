@@ -12,7 +12,7 @@ from .constants import JOINT_CONFIG_FILE, MESA_FIRMWARE_FILE, TIMEOUT_OVERHEAD
 
 
 MESA_BOARD_IP = '192.168.1.121'
-I620P_USB_SERIAL_ID = ''
+I620P_USB_SERIAL_ID = 'AH06II9V'
 ROBOTIQ_USB_SERIAL_ID = 'AH06IIBJ'
 NUM_JOINTS = 6
 
@@ -56,7 +56,11 @@ class Hardware(object):
 
         rt.loadrt('hostmot2')
         rt.loadrt(
-            'hm2_eth', board_ip=MESA_BOARD_IP, config='"num_encoders=6,num_stepgens=6"'
+            'hm2_eth',
+            board_ip=MESA_BOARD_IP,
+            config='"num_encoders={count},num_stepgens={count}"'.format(
+                count=NUM_JOINTS
+            ),
         )
         hal.Pin('hm2_7i80.0.watchdog.timeout_ns').set(int(self.thread.period_ns * 2))
 
@@ -86,7 +90,7 @@ class Hardware(object):
         self.error_signals.append(error)
 
     def _init_gripper(self):
-        name = 'robitiq-gripper'
+        name = 'robotiq-gripper'
         interval_s = 0.1
         hal.loadusr(
             'robotiq_modbus.py -n {name} -i {interval} -s {serial}'.format(
@@ -106,12 +110,13 @@ class Hardware(object):
     def _setup_gripper(self):
         open_close = hal.Signal('gripper-open-close', hal.HAL_BIT)
         opened = hal.Signal('gripper-opened', hal.HAL_BIT)
+        cmd_active = hal.Signal('gripper-cmd-active', hal.HAL_BIT)
 
         mux2 = rt.newinst('mux2v2', 'mux-gripper-open-close')
         hal.addf(mux2.name, self.thread.name)
         mux2.pin('sel').link(open_close)
-        mux2.pin('in0').set(0x00)
-        mux2.pin('in1').set(0xFF)
+        mux2.pin('in0').set(0xFF)
+        mux2.pin('in1').set(0x00)
 
         float2u32 = rt.newinst('conv_float_u32', 'conv-gripper-pos')
         hal.addf(float2u32.name, self.thread.name)
@@ -122,10 +127,15 @@ class Hardware(object):
         comp.pin('in0').set(254.5)
         comp.pin('out').link(opened)
 
+        u32tofloat = rt.newinst('conv_u32_float', 'conv-gripper-pos-fb')
+        hal.addf(u32tofloat.name, self.thread.name)
+        u32tofloat.pin('out').link(comp.pin('in1'))
+
         robotiq = hal.components['robotiq-gripper']
         robotiq.pin('force').set(0xFF)
         robotiq.pin('velocity').set(0xFF)
-        robotiq.pin('position-fb').link(comp.pin('in1'))
+        robotiq.pin('position-fb').link(u32tofloat.pin('in'))
+        robotiq.pin('cmd-active').link(cmd_active)
         float2u32.pin('out').link(robotiq.pin('position'))
 
     @staticmethod
