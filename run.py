@@ -8,7 +8,9 @@ import time
 from machinekit import launcher
 from machinekit import config
 
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
+PATH = os.path.dirname(os.path.realpath(__file__))
+os.chdir(PATH)
+os.environ['PYTHONPATH'] = PATH
 
 
 def main():
