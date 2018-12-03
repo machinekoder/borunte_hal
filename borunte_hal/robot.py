@@ -278,5 +278,3 @@ def configure_hal(thread):
 
     # ready to start the threads
     hal.start_threads()
-
-    hal.loadusr('haltalk', wait=True)
