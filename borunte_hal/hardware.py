@@ -29,7 +29,24 @@ class Hardware(object):
 
         self._init_hm2()
         self._init_modbus()
-        self._init_robotiq()
+        self._init_gripper()
+
+    def read(self):
+        hal.addf('hm2_7i80.0.read', self.thread.name)
+
+    def setup(self):
+        self._setup_joints()
+        self._setup_io()
+        self._setup_brakes()
+        self._setup_servo_on()
+        self._setup_estop()
+        self._setup_drive_alarm()
+        self._setup_lamp()
+        self._setup_gripper()
+
+    def write(self):
+        hal.addf('hm2_7i80.0.pet_watchdog', self.thread.name)
+        hal.addf('hm2_7i80.0.write', self.thread.name)
 
     def _init_hm2(self):
         mesahandler = MesaHandler(
@@ -68,7 +85,7 @@ class Hardware(object):
         comp.pin('error').link(error)
         self.error_signals.append(error)
 
-    def _init_robotiq(self):
+    def _init_gripper(self):
         name = 'robitiq-gripper'
         interval_s = 0.1
         hal.loadusr(
@@ -86,21 +103,30 @@ class Hardware(object):
         comp.pin('error').link(error)
         self.error_signals.append(error)
 
-    def read(self):
-        hal.addf('hm2_7i80.0.read', self.thread.name)
+    def _setup_gripper(self):
+        open_close = hal.Signal('gripper-open-close', hal.HAL_BIT)
+        opened = hal.Signal('gripper-opened', hal.HAL_BIT)
 
-    def setup(self):
-        self._setup_joints()
-        self._setup_io()
-        self._setup_brakes()
-        self._setup_servo_on()
-        self._setup_estop()
-        self._setup_drive_alarm()
-        self._setup_lamp()
+        mux2 = rt.newinst('mux2v2', 'mux-gripper-open-close')
+        hal.addf(mux2.name, self.thread.name)
+        mux2.pin('sel').link(open_close)
+        mux2.pin('in0').set(0x00)
+        mux2.pin('in1').set(0xFF)
 
-    def write(self):
-        hal.addf('hm2_7i80.0.pet_watchdog', self.thread.name)
-        hal.addf('hm2_7i80.0.write', self.thread.name)
+        float2u32 = rt.newinst('conv_float_u32', 'conv-gripper-pos')
+        hal.addf(float2u32.name, self.thread.name)
+        mux2.pin('out').link(float2u32.pin('in'))
+
+        comp = rt.newinst('compv2', 'comp-gripper-fb-pos')
+        hal.addf(comp.name, self.thread.name)
+        comp.pin('in0').set(254.5)
+        comp.pin('out').link(opened)
+
+        robotiq = hal.components['robotiq-gripper']
+        robotiq.pin('force').set(0xFF)
+        robotiq.pin('velocity').set(0xFF)
+        robotiq.pin('position-fb').link(comp.pin('in1'))
+        float2u32.pin('out').link(robotiq.pin('position'))
 
     @staticmethod
     def _setup_joints():

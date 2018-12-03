@@ -29,6 +29,7 @@ class Hardware(object):
         self._setup_joints()
         self._setup_brakes()
         self._setup_estop()
+        self._setup_gripper()
 
     def write(self):
         for i in range(NUM_JOINTS):
@@ -88,3 +89,12 @@ class Hardware(object):
         hal.addf(or2.name, self.thread.name)
         or2.pin('in0').set(True)
         or2.pin('out').link('estop-in')
+
+    def _setup_gripper(self):
+        open_close = hal.Signal('gripper-open-close', hal.HAL_BIT)
+        opened = hal.Signal('gripper-opened', hal.HAL_BIT)
+
+        or2 = rt.newinst('or2v2', 'or2-gripper-open-close')
+        hal.addf(or2.name, self.thread.name)
+        or2.pin('in0').link(open_close)
+        or2.pin('out').link(opened)
