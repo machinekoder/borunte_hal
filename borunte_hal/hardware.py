@@ -12,6 +12,8 @@ from .constants import JOINT_CONFIG_FILE, MESA_FIRMWARE_FILE, TIMEOUT_OVERHEAD
 
 
 MESA_BOARD_IP = '192.168.1.121'
+I620P_USB_SERIAL_ID = ''
+ROBOTIQ_USB_SERIAL_ID = 'AH06IIBJ'
 NUM_JOINTS = 6
 
 
@@ -49,7 +51,12 @@ class Hardware(object):
         name = 'i620p-abs'
         interval_s = 1.0
         hal.loadusr(
-            'i620p_modbus.py -c {} -n {} -i {}'.format(NUM_JOINTS, name, interval_s),
+            'i620p_modbus.py -c {count} -n {name} -i {interval} -s {serial}'.format(
+                count=NUM_JOINTS,
+                name=name,
+                interval=interval_s,
+                serial=I620P_USB_SERIAL_ID,
+            ),
             wait_name='i620p-abs',
         )
         self.user_comps.append(
@@ -65,7 +72,10 @@ class Hardware(object):
         name = 'robitiq-gripper'
         interval_s = 0.1
         hal.loadusr(
-            'robotiq_modbus.py -n {} -i {}'.format(name, interval_s), wait_name=name
+            'robotiq_modbus.py -n {name} -i {interval} -s {serial}'.format(
+                name=name, interval=interval_s, serial=ROBOTIQ_USB_SERIAL_ID
+            ),
+            wait_name=name,
         )
         self.user_comps.append(
             UserComp(name=name, timeout=(interval_s * TIMEOUT_OVERHEAD))

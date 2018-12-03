@@ -18,7 +18,6 @@ MODBUS_STOPBITS = 2
 MODBUS_BYTESIZE = 8
 MODBUS_PARITY = 'N'
 MODBUS_BAUDRATE = 57600
-SERIAL_ID = ''
 MODBUS_TIMEOUT_S = 0.2
 
 ServoPins = namedtuple('ServoPins', 'raw_ticks scale abs_pos')

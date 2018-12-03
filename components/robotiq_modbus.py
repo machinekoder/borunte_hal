@@ -18,7 +18,6 @@ MODBUS_STOPBITS = 1
 MODBUS_BYTESIZE = 8
 MODBUS_PARITY = 'N'
 MODBUS_BAUDRATE = 115200
-SERIAL_ID = 'AH06IIBJ'
 MODBUS_TIMEOUT_S = 0.2
 
 READING_REGISTER = 0x07D0
@@ -178,7 +177,7 @@ class RobotiqHandComponent(object):
         return success
 
     def _connect_client(self):
-        tty = get_tty_for_serial_id(SERIAL_ID)
+        tty = get_tty_for_serial_id(self.usb_serial_id)
         if not tty:
             logging.warn('no matching tty found')
             return False
