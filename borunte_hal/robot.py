@@ -91,7 +91,7 @@ class BorunteConfig(object):
             hal.Pin('{}.watchdog'.format(comp.name)).link(sig_in)
             watchdog.pin('input-{:02}'.format(n)).link(sig_in)
             watchdog.pin('timeout-{:02}'.format(n)).set(comp.timeout)
-        watchdog.pin('enable').link(power_on)
+        watchdog.pin('enable-in').link(power_on)
         watchdog.pin('ok-out').link(watchdog_ok)
 
         not_comp = rt.newinst('not', 'not.watchdog-error')
