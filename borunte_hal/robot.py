@@ -83,7 +83,7 @@ class BorunteConfig(object):
         watchdog_error_raw = hal.Signal('watchdog-error-raw', hal.HAL_BIT)
         watchdog_error = hal.Signal('watchdog-error', hal.HAL_BIT)
 
-        watchdog = rt.newinst('watchdogv2', 'watchdog-usrcomp', pincount=len(comps))
+        watchdog = rt.newinst('watchdogv2', 'watchdog.usrcomp', pincount=len(comps))
         hal.addf('{}.set-timeouts'.format(watchdog.name), thread.name)
         hal.addf('{}.process'.format(watchdog.name), thread.name)
         for n, comp in enumerate(comps):
@@ -94,12 +94,12 @@ class BorunteConfig(object):
         watchdog.pin('enable').link(power_on)
         watchdog.pin('ok-out').link(watchdog_ok)
 
-        not_comp = rt.newinst('notv2', 'not-watchdog-error')
+        not_comp = rt.newinst('notv2', 'not.watchdog-error')
         hal.addf(not_comp.name, thread.name)
         not_comp.pin('in').link(watchdog_ok)
         not_comp.pin('out').link(watchdog_error_raw)
 
-        and2 = rt.newinst('and2', 'and2-watchdog-error')
+        and2 = rt.newinst('and2', 'and2.watchdog-error')
         hal.addf(and2.name, thread.name)
         and2.pin('in0').link(watchdog_error_raw)
         and2.pin('in1').link(power_on)
@@ -114,7 +114,7 @@ class BorunteConfig(object):
         ok = hal.Signal('ok', hal.HAL_BIT)
 
         num = len(error_signals)
-        or_comp = rt.newinst('orn', 'or{}-estop-error'.format(num), pincount=num)
+        or_comp = rt.newinst('orn', 'or{}.estop-error'.format(num), pincount=num)
         hal.addf(or_comp.name, thread.name)
         for n, sig in enumerate(error_signals):
             or_comp.pin('in{}'.format(n)).link(sig)
@@ -139,13 +139,13 @@ class BorunteConfig(object):
     @staticmethod
     def _setup_drive_safety_signals(thread):
         for i in range(1, NUM_JOINTS + 1):
-            and2_son = rt.newinst('and2v2', 'and2-son-{}'.format(i))
+            and2_son = rt.newinst('and2v2', 'and2.son-{}'.format(i))
             hal.addf(and2_son.name, thread.name)
             and2_son.pin('in0').link('son-{}'.format(i))
             and2_son.pin('in1').link('ok')
             and2_son.pin('out').link('son-{}-out'.format(i))
 
-            and2_brake = rt.newinst('and2v2', 'and2-brake-release-{}'.format(i))
+            and2_brake = rt.newinst('and2v2', 'and2.brake-release-{}'.format(i))
             hal.addf(and2_brake.name, thread.name)
             and2_brake.pin('in0').link('brake-release-{}'.format(i))
             and2_brake.pin('in1').link('ok')
@@ -154,7 +154,7 @@ class BorunteConfig(object):
     @staticmethod
     def _setup_power_enable(thread):
         for i in range(1, NUM_JOINTS + 1):
-            or1 = rt.newinst('ornv2', 'pass-son-{}'.format(i), pincount=1)
+            or1 = rt.newinst('ornv2', 'pass.son-{}'.format(i), pincount=1)
             hal.addf(or1.name, thread.name)
             or1.pin('in0').link('power-on')
             or1.pin('out').link('son-{}'.format(i))
@@ -191,14 +191,14 @@ class BorunteConfig(object):
         son_not = hal.Signal('son-{}-not'.format(nr), hal.HAL_BIT)
         set_home = hal.Signal('joint-{}-set-home'.format(nr), hal.HAL_BIT)
 
-        offset = rt.newinst('offsetv2', 'offset-joint-{}'.format(nr))
+        offset = rt.newinst('offsetv2', 'offset.joint-{}'.format(nr))
         offset.pin('offset').link(pos_offset)
         offset.pin('fb-in').link(fb_in_pos)
         offset.pin('fb-out').link(fb_out_pos)
         offset.pin('in').link(cmd_in_pos)
         offset.pin('out').link(cmd_out_pos)
 
-        abs_joint = rt.newinst('absolute_joint', 'abs-joint-{}'.format(nr))
+        abs_joint = rt.newinst('absolute_joint', 'abs-joint.{}'.format(nr))
         abs_joint.pin('home-pos').link(home_pos)
         abs_joint.pin('abs-pos').link(abs_pos)
         abs_joint.pin('real-pos').link(cmd_pos)
@@ -207,22 +207,22 @@ class BorunteConfig(object):
         abs_joint.pin('set-abs').link(son_not)
         abs_joint.pin('set-home').link(set_home)
 
-        not_son = rt.newinst('notv2', 'not-son-{}'.format(nr))
+        not_son = rt.newinst('notv2', 'not.son-{}'.format(nr))
         not_son.pin('in').link(son)
         not_son.pin('out').link(son_not)
 
         # setup min/max joint limits
-        limit = rt.newinst('limit1v2', 'limit-joint-{}'.format(nr))
+        limit = rt.newinst('limit1v2', 'limit1.joint-{}'.format(nr))
         limit.pin('min').link(limit_min)
         limit.pin('max').link(limit_max)
         limit.pin('in').link(cmd_pos)
         limit.pin('out').link(cmd_in_pos)
 
         # connect functions in correct order
-        hal.addf('{}.update-feedback'.format(offset.name), thread.name)
         hal.addf(not_son.name, thread.name)
         hal.addf(abs_joint.name, thread.name)
         hal.addf(limit.name, thread.name)
+        hal.addf('{}.update-feedback'.format(offset.name), thread.name)
         hal.addf('{}.update-output'.format(offset.name), thread.name)
 
     @staticmethod
@@ -234,17 +234,17 @@ class BorunteConfig(object):
         ferror_max = hal.Signal('joint-{}-ferror-max'.format(nr), hal.HAL_FLOAT)
         ferror_active = hal.Signal('joint-{}-ferror-active'.format(nr), hal.HAL_BIT)
 
-        sum_ferror = rt.newinst('sum2v2', 'sum2-joint-{}-ferror'.format(nr))
+        sum_ferror = rt.newinst('sum2v2', 'sum2.joint-{}-ferror'.format(nr))
         sum_ferror.pin('in0').link(cmd_fb_pos)
         sum_ferror.pin('in1').link(fb_in_pos)
         sum_ferror.pin('gain1').set(-1.0)
         sum_ferror.pin('out').link(ferror)
 
-        abs_ferror = rt.newinst('absv2', 'abs-joint-{}-ferror'.format(nr))
+        abs_ferror = rt.newinst('absv2', 'abs.joint-{}-ferror'.format(nr))
         abs_ferror.pin('in').link(ferror)
         abs_ferror.pin('out').link(ferror_abs)
 
-        comp = rt.newinst('compv2', 'comp-joint-{}-ferror'.format(nr))
+        comp = rt.newinst('compv2', 'comp.joint-{}-ferror'.format(nr))
         comp.pin('in0').link(ferror_max)
         comp.pin('in1').link(ferror_abs)
         comp.pin('out').link(ferror_active)
