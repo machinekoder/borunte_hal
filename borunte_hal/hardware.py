@@ -14,6 +14,7 @@ from .constants import JOINT_CONFIG_FILE, MESA_FIRMWARE_FILE, TIMEOUT_OVERHEAD
 MESA_BOARD_IP = '192.168.1.121'
 I620P_USB_SERIAL_ID = 'AH06II9V'
 ROBOTIQ_USB_SERIAL_ID = 'AH06IIBJ'
+BRAKE_RELEASE_DELAY = 0.5
 NUM_JOINTS = 6
 
 
@@ -140,8 +141,7 @@ class Hardware(object):
 
         open_close.set(True)  # start opened
 
-    @staticmethod
-    def _setup_joints():
+    def _setup_joints(self):
         with open(JOINT_CONFIG_FILE, 'r') as f:
             config = yaml.safe_load(f)
 
@@ -149,6 +149,14 @@ class Hardware(object):
             c = config['joint_{}'.format(i)]
             scale = c['gear_ratio'] * c['steps_per_rev'] / (2.0 * pi)
             nr = 6 - i
+
+            # delay stepgen enable to allow brakes to release
+            timedelay = rt.newinst('timedelay', 'timedelay.stepgen-{}-enable'.format(i))
+            hal.addf(timedelay.name, self.thread.name)
+            timedelay.pin('in').link('brake-release-{}-out'.format(i))
+            timedelay.pin('out').link('stepgen-{}-enable'.format(i))
+            timedelay.pin('on-delay').set(BRAKE_RELEASE_DELAY)
+            timedelay.pin('out-delay').set(0.0)
 
             # stepgen
             stepgen = PinGroup('hm2_7i80.0.stepgen.{:02}'.format(nr))
@@ -161,7 +169,7 @@ class Hardware(object):
             stepgen.pin('position-scale').set(scale)
             stepgen.pin('maxvel').set(c['max_vel_rad_s'] / 10)
             stepgen.pin('maxaccel').set(c['max_accel_rad_s2'] / 10)
-            stepgen.pin('enable').link('son-{}-out'.format(i))
+            stepgen.pin('enable').link('brake-release-{}-out'.format(i))
             stepgen.pin('position-cmd').link('joint-{}-cmd-out-pos'.format(i))
             stepgen.pin('position-fb').link('joint-{}-cmd-fb-pos'.format(i))
 

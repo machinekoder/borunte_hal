@@ -49,7 +49,7 @@ class Hardware(object):
             stepgen.pin('position-scale').set(scale)
             stepgen.pin('maxvel').set(c['max_vel_rad_s'] / 10)
             stepgen.pin('maxaccel').set(c['max_accel_rad_s2'] / 10)
-            stepgen.pin('enable').link('son-{}-out'.format(i))
+            stepgen.pin('enable').link('brake-release-{}-out'.format(i))
             stepgen.pin('position-cmd').link('joint-{}-cmd-out-pos'.format(i))
             stepgen.pin('position-fb').link('joint-{}-cmd-fb-pos'.format(i))
 
