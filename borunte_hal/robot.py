@@ -261,7 +261,7 @@ class BorunteConfig(object):
 
 
 def setup_thread(cgname=None):
-    thread_period = 1e8 if SIM_MODE else 1e6
+    thread_period = 1e7 if SIM_MODE else 1e6
     thread = HalThread(name='main_thread', period_ns=thread_period)
     kwargs = {}
     if cgname and not SIM_MODE:
