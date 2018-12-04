@@ -1,6 +1,6 @@
 joint_1:
   gear_ratio: 100.0
-  steps_per_rev: 10000
+  steps_per_rev: -10000
   dirhold_ns: 125
   dirsetup_ns: 125
   steplen_ns: 125
@@ -9,7 +9,7 @@ joint_1:
   max_accel_rad_s2: 31.4
   min_limit_rad: -2.967
   max_limit_rad: 2.967
-  home_pos: 4117.61
+  home_pos: -4117.61
   max_ferror_rad: 0.1
 
 joint_2:
@@ -42,7 +42,7 @@ joint_3:
 
 joint_4:
   gear_ratio: 80.0
-  steps_per_rev: 10000
+  steps_per_rev: -10000
   dirhold_ns: 125
   dirsetup_ns: 125
   steplen_ns: 125
@@ -51,7 +51,7 @@ joint_4:
   max_accel_rad_s2: 39.3
   min_limit_rad: -1.571
   max_limit_rad: 1.571
-  home_pos: 5147.168
+  home_pos: -5147.168
   max_ferror_rad: 0.1
 
 joint_5:
