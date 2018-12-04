@@ -138,6 +138,8 @@ class Hardware(object):
         robotiq.pin('cmd-active').link(cmd_active)
         float2u32.pin('out').link(robotiq.pin('position'))
 
+        open_close.set(True)  # start opened
+
     @staticmethod
     def _setup_joints():
         with open(JOINT_CONFIG_FILE, 'r') as f:
