@@ -39,7 +39,7 @@ def joint_offsets(hal_config):
             BorunteConfig._setup_joint_offset(nr, hal_config.thread)
 
             # feed back the output for now
-            sum2 = rt.newinst('sum2v2', 'sum2-{}-test'.format(nr))
+            sum2 = rt.newinst('sum2', 'sum2-{}-test'.format(nr))
             hal.addf(sum2.name, hal_config.thread.name)
             sum2.pin('in0').link(self.cmd_out_pos)
             sum2.pin('out').link(self.fb_in_pos)

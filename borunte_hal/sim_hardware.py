@@ -54,7 +54,7 @@ class Hardware(object):
             stepgen.pin('position-fb').link('joint-{}-cmd-fb-pos'.format(i))
 
             # encoder
-            sum2 = rt.newinst('sum2v2', 'sum2.encoder-{}-fb'.format(nr))
+            sum2 = rt.newinst('sum2', 'sum2.encoder-{}-fb'.format(nr))
             hal.addf(sum2.name, self.thread.name)
             sum2.pin('in0').link('joint-{}-cmd-fb-pos'.format(i))
             sum2.pin('in1').set(
@@ -81,13 +81,13 @@ class Hardware(object):
     def _setup_brakes(self):
         # pass through SON to brake disable signal
         for i in range(1, NUM_JOINTS + 1):
-            or2 = rt.newinst('or2v2', 'or2.brake-release-{}'.format(i))
+            or2 = rt.newinst('or2', 'or2.brake-release-{}'.format(i))
             hal.addf(or2.name, self.thread.name)
             or2.pin('in0').link('son-{}-out'.format(i))
             or2.pin('out').link('brake-release-{}'.format(i))
 
     def _setup_estop(self):
-        or2 = rt.newinst('or2v2', 'or2.estop-in')
+        or2 = rt.newinst('or2', 'or2.estop-in')
         hal.addf(or2.name, self.thread.name)
         or2.pin('in0').set(True)
         or2.pin('out').link('estop-in')
@@ -96,7 +96,7 @@ class Hardware(object):
         open_close = hal.Signal('gripper-open-close', hal.HAL_BIT)
         opened = hal.Signal('gripper-opened', hal.HAL_BIT)
 
-        or2 = rt.newinst('or2v2', 'or2.gripper-open-close')
+        or2 = rt.newinst('or2', 'or2.gripper-open-close')
         hal.addf(or2.name, self.thread.name)
         or2.pin('in0').link(open_close)
         or2.pin('out').link(opened)

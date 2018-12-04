@@ -112,7 +112,7 @@ class Hardware(object):
         opened = hal.Signal('gripper-opened', hal.HAL_BIT)
         cmd_active = hal.Signal('gripper-cmd-active', hal.HAL_BIT)
 
-        mux2 = rt.newinst('mux2v2', 'mux2.gripper-open-close')
+        mux2 = rt.newinst('mux2', 'mux2.gripper-open-close')
         hal.addf(mux2.name, self.thread.name)
         mux2.pin('sel').link(open_close)
         mux2.pin('in0').set(0xFF)
@@ -122,7 +122,7 @@ class Hardware(object):
         hal.addf(float2u32.name, self.thread.name)
         mux2.pin('out').link(float2u32.pin('in'))
 
-        comp = rt.newinst('compv2', 'comp.gripper-fb-pos')
+        comp = rt.newinst('comp', 'comp.gripper-fb-pos')
         hal.addf(comp.name, self.thread.name)
         comp.pin('in0').set(254.5)
         comp.pin('out').link(opened)
