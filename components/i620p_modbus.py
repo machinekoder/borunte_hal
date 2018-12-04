@@ -54,7 +54,11 @@ class IS620Component(object):
                     except AttributeError:
                         self._error_pin.set(True)
                         break
-                    abs_pos = raw_ticks / max(1.0, self._servo_pins[i].scale.get())
+                    scale = self._servo_pins[i].scale.get()
+                    if scale >= 0.0:
+                        abs_pos = raw_ticks / max(1.0, scale)
+                    else:
+                        abs_pos = raw_ticks / min(-1.0, scale)
                     self._servo_pins[i].raw_ticks.set(raw_ticks)
                     self._servo_pins[i].abs_pos.set(abs_pos)
 
