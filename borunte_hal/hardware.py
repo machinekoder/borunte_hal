@@ -158,6 +158,12 @@ class Hardware(object):
             timedelay.pin('on-delay').set(BRAKE_RELEASE_DELAY)
             timedelay.pin('out-delay').set(0.0)
 
+            # only update stepgen pos-cmd when enabled
+            tristate = rt.newinst('tristatev2', 'tristate.joint-{}-pos-cmd'.format(i))
+            hal.addf(tristate.name, self.thread.name)
+            tristate.pin('in').link('joint-{}-cmd-out-pos'.format(i))
+            tristate.pin('enable').link('brake-release-{}-out'.format(i))
+
             # stepgen
             stepgen = PinGroup('hm2_7i80.0.stepgen.{:02}'.format(nr))
             stepgen.pin('step_type').set(0)  # 0 = Step/Dir, 1 = Up/Down, 2 = Quadrature
@@ -170,7 +176,7 @@ class Hardware(object):
             stepgen.pin('maxvel').set(c['max_vel_rad_s'] / 10)
             stepgen.pin('maxaccel').set(c['max_accel_rad_s2'] / 10)
             stepgen.pin('enable').link('brake-release-{}-out'.format(i))
-            stepgen.pin('position-cmd').link('joint-{}-cmd-out-pos'.format(i))
+            tristate.pin('out').link(stepgen.pin('position-cmd'))
             stepgen.pin('position-fb').link('joint-{}-cmd-fb-pos'.format(i))
 
             # encoder
