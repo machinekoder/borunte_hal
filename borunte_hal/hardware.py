@@ -181,8 +181,12 @@ class Hardware(object):
 
             # encoder
             encoder = PinGroup('hm2_7i80.0.encoder.{:02}'.format(nr))
-            encoder.pin('index-enable').set(True)
-            encoder.pin('filter').set(True)  # use 15 clocks to register change
+            encoder.pin('index-enable').set(False)
+            encoder.pin('latch-enable').set(False)
+            encoder.pin('reset').set(False)
+            # Filter incoming:
+            # True: 15clk@50MHz = 30ns, False: 3clk@MHz = 6ns
+            encoder.pin('filter').set(False)
             encoder.pin('scale').set(-scale)
             encoder.pin('position').link('joint-{}-fb-in-pos'.format(i))
 
