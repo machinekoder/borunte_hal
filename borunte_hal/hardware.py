@@ -71,7 +71,7 @@ class Hardware(object):
 
     def _init_modbus(self):
         name = 'i620p-abs'
-        interval_s = 1.0
+        interval_s = 0.2
         hal.loadusr(
             'i620p_modbus.py -c {count} -n {name} -i {interval} -s {serial}'.format(
                 count=NUM_JOINTS,
@@ -203,6 +203,12 @@ class Hardware(object):
         tx3_en = PinGroup('hm2_7i80.0.gpio.048')
         tx3_en.pin('is_output').set(True)
         tx3_en.pin('out').set(False)
+
+        # enable abs_encoder only when powered-off
+        not_power_on = rt.newinst('not', 'not.power-on')
+        hal.addf(not_power_on.name, self.thread.name)
+        not_power_on.pin('in').link('power-on')
+        not_power_on.pin('out').link(hal.Pin('i620p-abs.enabled'))
 
     def _setup_io(self):
         io_pins = {}

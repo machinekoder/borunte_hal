@@ -34,6 +34,7 @@ class IS620Component(object):
         self._comp = None
         self._error_pin = None
         self._watchdog_pin = None
+        self._enabled_pin = None
         self._servo_pins = []
 
         self._last_time = 0.0
@@ -47,12 +48,14 @@ class IS620Component(object):
             if not self._client:
                 self._error_pin.set(not self._connect_client())
 
-            if not self._error_pin.get():
+            if not self._error_pin.get() and self._enabled_pin.get():
                 for i in range(self.num_servos):
                     try:
                         raw_ticks = self._read_encoder_ticks(i + 1)
-                    except AttributeError:
+                    except AttributeError as e:
+                        logging.error('could not read encoder ticks {}'.format(e))
                         self._error_pin.set(True)
+                        self._disconnect_client()
                         break
                     scale = self._servo_pins[i].scale.get()
                     if scale >= 0.0:
@@ -66,13 +69,14 @@ class IS620Component(object):
             time.sleep(self.interval_s - (time.time() - start_time))
 
     def stop(self):
-        if self._client:
-            self._client.close()
+        self._disconnect_client()
 
     def _init_comp(self):
         self._comp = hal.component(self.name)
         self._error_pin = self._comp.newpin('error', hal.HAL_BIT, hal.HAL_OUT)
         self._watchdog_pin = self._comp.newpin('watchdog', hal.HAL_BIT, hal.HAL_OUT)
+        self._enabled_pin = self._comp.newpin('enabled', hal.HAL_BIT, hal.HAL_IN)
+        
         for i in range(self.num_servos):
             servo_pins = ServoPins(
                 raw_ticks=self._comp.newpin(
@@ -99,7 +103,7 @@ class IS620Component(object):
             logging.warn('no matching tty found')
             return False
         if not os.path.exists(tty):
-            logging.warn('could not open serial device')
+            logging.warn('could not open serial device {}'.format(tty))
             return False
 
         self._client = ModbusClient(
@@ -115,7 +119,13 @@ class IS620Component(object):
         try:
             return self._client.connect()
         except AttributeError:
+            logging.error('could not connect to tty {}'.format(tty))
             return False
+
+    def _disconnect_client(self):
+        if self._client:
+            self._client.close()
+        self._client = None
 
 
 def main():
