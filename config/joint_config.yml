@@ -10,7 +10,7 @@ joint_1:
   min_limit_rad: -2.967
   max_limit_rad: 2.967
   home_pos: -4117.61
-  max_ferror_rad: 0.5
+  max_ferror_rad: 0.1
 
 joint_2:
   gear_ratio: 100.0
@@ -24,7 +24,7 @@ joint_2:
   min_limit_rad: -1.571
   max_limit_rad: 1.571
   home_pos: -0.2642582
-  max_ferror_rad: 0.5
+  max_ferror_rad: 0.1
 
 joint_3:
   gear_ratio: 101.0
@@ -38,7 +38,7 @@ joint_3:
   min_limit_rad: -1.571
   max_limit_rad: 1.222
   home_pos: 4077.126
-  max_ferror_rad: 0.5
+  max_ferror_rad: 0.1
 
 joint_4:
   gear_ratio: 80.0
@@ -52,7 +52,7 @@ joint_4:
   min_limit_rad: -1.571
   max_limit_rad: 1.571
   home_pos: -5147.168
-  max_ferror_rad: 0.5
+  max_ferror_rad: 0.1
 
 joint_5:
   gear_ratio: 51.0
@@ -66,7 +66,7 @@ joint_5:
   min_limit_rad: -1.571
   max_limit_rad: 1.571
   home_pos: -0.3070014
-  max_ferror_rad: 0.5
+  max_ferror_rad: 0.1
 
 joint_6:
   gear_ratio: 50.0
@@ -80,4 +80,4 @@ joint_6:
   min_limit_rad: -6.283
   max_limit_rad: 6.283
   home_pos: -8178.17
-  max_ferror_rad: 0.5
+  max_ferror_rad: 0.1
