@@ -14,7 +14,7 @@ from .constants import JOINT_CONFIG_FILE, MESA_FIRMWARE_FILE, TIMEOUT_OVERHEAD
 MESA_BOARD_IP = '192.168.1.121'
 I620P_USB_SERIAL_ID = 'AH06II9V'
 ROBOTIQ_USB_SERIAL_ID = 'AH06IIBJ'
-BRAKE_RELEASE_DELAY = 2.5
+BRAKE_RELEASE_DELAY = 0.5
 NUM_JOINTS = 6
 
 
@@ -158,12 +158,6 @@ class Hardware(object):
             timedelay.pin('on-delay').set(BRAKE_RELEASE_DELAY)
             timedelay.pin('off-delay').set(0.0)
 
-            # only update stepgen pos-cmd when enabled
-            tristate = rt.newinst('tristate_floatv2', 'tristate.joint-{}-pos-cmd'.format(i))
-            hal.addf(tristate.name, self.thread.name)
-            tristate.pin('in').link('joint-{}-cmd-out-pos'.format(i))
-            tristate.pin('enable').link('brake-release-{}-out'.format(i))
-
             # stepgen
             stepgen = PinGroup('hm2_7i80.0.stepgen.{:02}'.format(nr))
             stepgen.pin('step_type').set(0)  # 0 = Step/Dir, 1 = Up/Down, 2 = Quadrature
@@ -175,8 +169,9 @@ class Hardware(object):
             stepgen.pin('position-scale').set(scale)
             stepgen.pin('maxvel').set(c['max_vel_rad_s'] / 10)
             stepgen.pin('maxaccel').set(c['max_accel_rad_s2'] / 10)
-            stepgen.pin('enable').link('brake-release-{}-out'.format(i))
-            tristate.pin('out').link(stepgen.pin('position-cmd'))
+            stepgen.pin('enable').link('stepgen-{}-enable'.format(i))
+            #tristate.pin('out').link(stepgen.pin('position-cmd'))
+            stepgen.pin('position-cmd').link('joint-{}-cmd-out-pos'.format(i))
             stepgen.pin('position-fb').link('joint-{}-cmd-fb-pos'.format(i))
 
             # encoder
@@ -186,7 +181,7 @@ class Hardware(object):
             encoder.pin('reset').set(False)
             # Filter incoming:
             # True: 15clk@50MHz = 30ns, False: 3clk@MHz = 6ns
-            encoder.pin('filter').set(False)
+            encoder.pin('filter').set(True)
             encoder.pin('scale').set(-scale)
             encoder.pin('position').link('joint-{}-fb-in-pos'.format(i))
 
