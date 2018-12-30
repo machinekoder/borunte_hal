@@ -13,7 +13,7 @@ THREAD = HalThread(name='test-thread', period_ns=1e7)
 HalConfig = namedtuple('HalConfig', 'thread')
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def hal_config():
     from machinekit import launcher
 
