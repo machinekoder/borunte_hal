@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 import os
 
 _BASE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')

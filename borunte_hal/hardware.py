@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 from collections import namedtuple
 from math import pi
 
@@ -7,7 +7,8 @@ from machinekit import hal
 from machinekit import rtapi as rt
 
 from .mesahandler import MesaHandler
-from .utils import HalThread, PinGroup, UserComp
+from .utils import HalThread  # noqa: F401
+from .utils import PinGroup, UserComp
 from .constants import JOINT_CONFIG_FILE, MESA_FIRMWARE_FILE, TIMEOUT_OVERHEAD
 
 
@@ -170,7 +171,7 @@ class Hardware(object):
             stepgen.pin('maxvel').set(c['max_vel_rad_s'] / 10)
             stepgen.pin('maxaccel').set(c['max_accel_rad_s2'] / 10)
             stepgen.pin('enable').link('stepgen-{}-enable'.format(i))
-            #tristate.pin('out').link(stepgen.pin('position-cmd'))
+            # tristate.pin('out').link(stepgen.pin('position-cmd'))
             stepgen.pin('position-cmd').link('joint-{}-cmd-out-pos'.format(i))
             stepgen.pin('position-fb').link('joint-{}-cmd-fb-pos'.format(i))
 

@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 from machinekit import hal
 from machinekit import rtapi as rt
 from math import pi

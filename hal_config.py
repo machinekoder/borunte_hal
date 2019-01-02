@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 from machinekit import hal
 from borunte_hal.robot import setup_thread, configure_hal
 

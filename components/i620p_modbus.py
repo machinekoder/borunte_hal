@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding=utf-8
+# -*- coding: utf-8 -*-
 from __future__ import division
 
 import argparse
@@ -76,7 +76,7 @@ class IS620Component(object):
         self._error_pin = self._comp.newpin('error', hal.HAL_BIT, hal.HAL_OUT)
         self._watchdog_pin = self._comp.newpin('watchdog', hal.HAL_BIT, hal.HAL_OUT)
         self._enabled_pin = self._comp.newpin('enabled', hal.HAL_BIT, hal.HAL_IN)
-        
+
         for i in range(self.num_servos):
             servo_pins = ServoPins(
                 raw_ticks=self._comp.newpin(

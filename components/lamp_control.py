@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding=utf-8
+# -*- coding: utf-8 -*-
 import argparse
 import hal
 import time
@@ -15,9 +15,7 @@ class LampControlComponent(object):
         self._estop_active_pin = self._comp.newpin(
             'estop-active', hal.HAL_BIT, hal.HAL_IN
         )
-        self._power_on_pin = self._comp.newpin(
-            'power-on', hal.HAL_BIT, hal.HAL_IN
-        )
+        self._power_on_pin = self._comp.newpin('power-on', hal.HAL_BIT, hal.HAL_IN)
         self._blink_interval_pin = self._comp.newpin(
             'blink-interval', hal.HAL_FLOAT, hal.HAL_IN
         )

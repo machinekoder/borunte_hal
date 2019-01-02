@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
 from uuid import uuid4
 
 import pytest
@@ -8,8 +7,6 @@ import time
 from machinekit import hal
 from machinekit import rtapi as rt
 
-
-setattr(sys, 'testing', True)
 from borunte_hal.robot import BorunteConfig
 
 WAIT_TIME_S = 0.1

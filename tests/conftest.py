@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 import os
 from collections import namedtuple
 from borunte_hal.utils import HalThread
@@ -19,7 +19,8 @@ def hal_config():
 
     launcher.cleanup_session()
     comp_path = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), '../components/absolute_joint.icomp'
+        os.path.dirname(os.path.realpath(__file__)),
+        '../components/absolute_joint.icomp',
     )
     launcher.install_comp(comp_path)
     launcher.start_realtime()
