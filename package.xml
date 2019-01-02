@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>borunte_hal</name>
-  <version>0.0.1</version>
+  <version>1.0.0</version>
   <description>HAL config for the Borunte BRTIRUS0805A robot</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but mutiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/tormach_rb07</url> -->
+  <!-- <url type="website">http://wiki.ros.org/borunte_hal</url> -->
 
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
@@ -40,7 +40,6 @@
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
