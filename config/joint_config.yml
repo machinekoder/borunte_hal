@@ -6,7 +6,7 @@ joint_1:
   steplen_ns: 125
   stepspace_ns: 125
   max_vel_rad_s: 3.14
-  max_accel_rad_s2: 31.4
+  max_accel_rad_s2: 3.3
   min_limit_rad: -2.967
   max_limit_rad: 2.967
   home_pos: -4117.61
@@ -20,7 +20,7 @@ joint_2:
   steplen_ns: 125
   stepspace_ns: 125
   max_vel_rad_s: 2.09
-  max_accel_rad_s2: 20.9
+  max_accel_rad_s2: 3.3
   min_limit_rad: -1.571
   max_limit_rad: 1.571
   home_pos: -0.2642582
@@ -34,7 +34,7 @@ joint_3:
   steplen_ns: 125
   stepspace_ns: 125
   max_vel_rad_s: 2.62
-  max_accel_rad_s2: 26.2
+  max_accel_rad_s2: 3.3
   min_limit_rad: -1.571
   max_limit_rad: 1.222
   home_pos: 4077.126
@@ -48,7 +48,7 @@ joint_4:
   steplen_ns: 125
   stepspace_ns: 125
   max_vel_rad_s: 3.93
-  max_accel_rad_s2: 39.3
+  max_accel_rad_s2: 3.3
   min_limit_rad: -1.571
   max_limit_rad: 1.571
   home_pos: -5147.168
@@ -62,7 +62,7 @@ joint_5:
   steplen_ns: 125
   stepspace_ns: 125
   max_vel_rad_s: 4.71
-  max_accel_rad_s2: 47.1
+  max_accel_rad_s2: 3.3
   min_limit_rad: -1.571
   max_limit_rad: 1.571
   home_pos: -0.3070014
@@ -76,7 +76,7 @@ joint_6:
   steplen_ns: 125
   stepspace_ns: 125
   max_vel_rad_s: 4.71
-  max_accel_rad_s2: 47.1
+  max_accel_rad_s2: 3.3
   min_limit_rad: -6.283
   max_limit_rad: 6.283
   home_pos: -8178.17
