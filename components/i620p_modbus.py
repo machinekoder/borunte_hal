@@ -66,7 +66,7 @@ class IS620Component(object):
                     self._servo_pins[i].abs_pos.set(abs_pos)
 
             self._watchdog_pin.set(not self._watchdog_pin.get())
-            time.sleep(self.interval_s - (time.time() - start_time))
+            time.sleep(max(self.interval_s - (time.time() - start_time), 0))
 
     def stop(self):
         self._disconnect_client()
