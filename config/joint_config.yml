@@ -75,9 +75,9 @@ joint_6:
   dirsetup_ns: 125
   steplen_ns: 125
   stepspace_ns: 125
-  max_vel_rad_s: 4.71
-  max_accel_rad_s2: 3.3
+  max_vel_rad_s: 6.28
+  max_accel_rad_s2: 6.6
   min_limit_rad: -3.142
   max_limit_rad: 3.142
   home_pos: -8178.17
-  max_ferror_rad: 0.1
+  max_ferror_rad: 0.2
