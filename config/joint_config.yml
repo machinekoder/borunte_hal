@@ -6,11 +6,11 @@ joint_1:
   steplen_ns: 125
   stepspace_ns: 125
   max_vel_rad_s: 3.14
-  max_accel_rad_s2: 3.3
+  max_accel_rad_s2: 10.0
   min_limit_rad: -3.080
   max_limit_rad: 3.080
   home_pos: -4117.61
-  max_ferror_rad: 0.1
+  max_ferror_rad: 0.2
 
 joint_2:
   gear_ratio: 100.0
@@ -20,11 +20,11 @@ joint_2:
   steplen_ns: 125
   stepspace_ns: 125
   max_vel_rad_s: 2.09
-  max_accel_rad_s2: 3.3
+  max_accel_rad_s2: 10.45
   min_limit_rad: -1.741
   max_limit_rad: 2.351
   home_pos: -0.2642582
-  max_ferror_rad: 0.1
+  max_ferror_rad: 0.2
 
 joint_3:
   gear_ratio: 101.0
@@ -34,11 +34,11 @@ joint_3:
   steplen_ns: 125
   stepspace_ns: 125
   max_vel_rad_s: 2.62
-  max_accel_rad_s2: 3.3
+  max_accel_rad_s2: 13.1
   min_limit_rad: -2.094
   max_limit_rad: 1.570
   home_pos: 4077.126
-  max_ferror_rad: 0.1
+  max_ferror_rad: 0.2
 
 joint_4:
   gear_ratio: 80.0
@@ -48,11 +48,11 @@ joint_4:
   steplen_ns: 125
   stepspace_ns: 125
   max_vel_rad_s: 3.93
-  max_accel_rad_s2: 3.3
+  max_accel_rad_s2: 39.3
   min_limit_rad: -2.097
   max_limit_rad: 2.097
   home_pos: -5147.168
-  max_ferror_rad: 0.1
+  max_ferror_rad: 0.2
 
 joint_5:
   gear_ratio: 51.0
@@ -62,11 +62,11 @@ joint_5:
   steplen_ns: 125
   stepspace_ns: 125
   max_vel_rad_s: 4.71
-  max_accel_rad_s2: 3.3
+  max_accel_rad_s2: 47.1
   min_limit_rad: -2.097
   max_limit_rad: 2.097
   home_pos: -0.3070014
-  max_ferror_rad: 0.1
+  max_ferror_rad: 0.2
 
 joint_6:
   gear_ratio: 50.0
@@ -76,7 +76,7 @@ joint_6:
   steplen_ns: 125
   stepspace_ns: 125
   max_vel_rad_s: 6.28
-  max_accel_rad_s2: 6.6
+  max_accel_rad_s2: 62.8
   min_limit_rad: -3.142
   max_limit_rad: 3.142
   home_pos: -8178.17
