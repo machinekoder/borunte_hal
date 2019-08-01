@@ -70,6 +70,12 @@ class Hardware(object):
         hal.Pin('hm2_7i80.0.watchdog.has_bit').link(hw_watchdog_signal)
         self.error_signals.append(hw_watchdog_signal)
 
+        reset = rt.newinst('reset', 'reset.watchdog')
+        hal.addf(reset.name, self.thread.name)
+        reset.pin('trigger').link('power-on')
+        reset.pin('reset-bit').set(False)
+        reset.pin('out-bit').link(hw_watchdog_signal)
+
     def _init_modbus(self):
         name = 'i620p-abs'
         interval_s = 0.2
