@@ -63,7 +63,7 @@ joint_5:
   stepspace_ns: 125
   max_vel_rad_s: 4.71
   max_accel_rad_s2: 47.1
-  min_limit_rad: -2.097
+  min_limit_rad: -1.919
   max_limit_rad: 2.097
   home_pos: -0.3070014
   max_ferror_rad: 0.2
