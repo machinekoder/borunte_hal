@@ -15,7 +15,7 @@ from .constants import JOINT_CONFIG_FILE, MESA_FIRMWARE_FILE, TIMEOUT_OVERHEAD
 MESA_BOARD_IP = '192.168.1.121'
 I620P_USB_SERIAL_ID = 'AH06II9V'
 ROBOTIQ_USB_SERIAL_ID = 'AH06IIBJ'
-BRAKE_RELEASE_DELAY = 0.5
+BRAKE_RELEASE_DELAY_S = 0.5
 NUM_JOINTS = 6
 
 
@@ -156,7 +156,7 @@ class Hardware(object):
             hal.addf(timedelay.name, self.thread.name)
             timedelay.pin('in').link('brake-release-{}-out'.format(i))
             timedelay.pin('out').link('stepgen-{}-enable'.format(i))
-            timedelay.pin('on-delay').set(BRAKE_RELEASE_DELAY)
+            timedelay.pin('on-delay').set(BRAKE_RELEASE_DELAY_S)
             timedelay.pin('off-delay').set(0.0)
 
             # stepgen
