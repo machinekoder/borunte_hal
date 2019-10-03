@@ -19,6 +19,8 @@ else:
 
 
 class BorunteConfig(object):
+    RESET_DELAY_S = 0.1
+
     def __init__(self, thread):
         self.thread = thread
         self.hardware = None
@@ -35,26 +37,30 @@ class BorunteConfig(object):
         self._create_lamp_control()
         self.hardware.setup()
 
-        self._setup_usrcomp_watchdog(
-            comps=self.user_comps + self.hardware.user_comps, thread=self.thread
-        )
         self._setup_estop(thread=self.thread)
         self._setup_drive_safety_signals(thread=self.thread)
         self._setup_power_enable(thread=self.thread)
 
         self.hardware.write()
 
+        self._setup_usrcomp_watchdog(
+            comps=self.user_comps + self.hardware.user_comps, thread=self.thread
+        )
+        self._setup_user_control(thread=self.thread)
+
         self._create_control_remote_component()
 
     @staticmethod
     def _create_control_remote_component():
         control = hal.RemoteComponent('control', timer=100)
-        control.newpin('power-on', hal.HAL_BIT, hal.HAL_IO)
-        control.newpin('estop-active', hal.HAL_BIT, hal.HAL_IN)
+        control.newpin('state_cmd', hal.HAL_U32, hal.HAL_IO)
+        control.newpin('state_fb', hal.HAL_S32, hal.HAL_IN)
+        control.newpin('reset', hal.HAL_BIT, hal.HAL_IO)
         control.ready()
 
-        control.pin('power-on').link('power-on')
-        control.pin('estop-active').link('estop-active')
+        control.pin('state_cmd').link('state-cmd')
+        control.pin('state_fb').link('state-fb')
+        control.pin('reset').link('reset-in')
 
     def _create_lamp_control(self):
         blink_interval_s = 0.5
@@ -106,8 +112,39 @@ class BorunteConfig(object):
         and2.pin('out').link(watchdog_error)
 
     @staticmethod
+    def _setup_user_control(thread):
+        conv_state_cmd = rt.newinst('conv_u32_bit', 'conv_u32_bit.state-cmd')
+        hal.addf(conv_state_cmd.name, thread.name)
+        conv_state_cmd.pin('in').link('state-cmd')
+        conv_state_cmd.pin('out').link('power-on')
+
+        conv_state_fb = rt.newinst('conv_bit_s32', 'conv_bit_s32.state-fb')
+        hal.addf(conv_state_fb.name, thread.name)
+        conv_state_fb.pin('in').link('lamp-yellow')
+        conv_state_fb.pin('out').link('state-fb')
+
+        reset = rt.newinst('reset', 'reset.state-cmd')
+        hal.addf(reset.name, thread.name)
+        reset.pin('trigger').link('estop-active')
+        reset.pin('out-u32').link('state-cmd')
+        reset.pin('rising').set(True)
+
+        and2 = rt.newinst('and2', 'and2.reset-state-cmd')
+        hal.addf(and2.name, thread.name)
+        and2.pin('in0').link('reset')
+        and2.pin('in1').link('estop-active')
+
+        oneshot = rt.newinst('oneshot', 'oneshot.reset')
+        hal.addf(oneshot.name, thread.name)
+        oneshot.pin('in').link('reset-in')
+        oneshot.pin('out-not').link('reset')
+        oneshot.pin('width').set(BorunteConfig.RESET_DELAY_S)
+        oneshot.pin('rising').set(True)
+        oneshot.pin('falling').set(True)
+
+    @staticmethod
     def _setup_estop_chain(error_signals, thread):
-        power_on = hal.Signal('power-on', hal.HAL_BIT)
+        reset = hal.Signal('reset', hal.HAL_BIT)
         estop_active = hal.Signal('estop-active', hal.HAL_BIT)
         estop_error = hal.Signal('estop-error', hal.HAL_BIT)
         estop_in = hal.Signal('estop-in', hal.HAL_BIT)
@@ -125,7 +162,7 @@ class BorunteConfig(object):
         estop_latch.pin('ok-in').link(estop_in)
         estop_latch.pin('fault-in').link(estop_error)
         estop_latch.pin('fault-out').link(estop_active)
-        estop_latch.pin('reset').link(power_on)
+        estop_latch.pin('reset').link(reset)
         estop_latch.pin('ok-out').link(ok)
 
     def _setup_estop(self, thread):
@@ -170,10 +207,15 @@ class BorunteConfig(object):
         hal.Signal('estop-in', hal.HAL_BIT)
         hal.Signal('estop-active', hal.HAL_BIT)
         hal.Signal('power-on', hal.HAL_BIT)
+        hal.Signal('reset', hal.HAL_BIT)
         hal.Signal('lamp-red', hal.HAL_BIT)
         hal.Signal('lamp-green', hal.HAL_BIT)
         hal.Signal('lamp-yellow', hal.HAL_BIT)
         hal.Signal('lamp-signal', hal.HAL_BIT)
+        # from user
+        hal.Signal('state-cmd', hal.HAL_U32)
+        hal.Signal('state-fb', hal.HAL_S32)
+        hal.Signal('reset-in', hal.HAL_BIT)
 
     @staticmethod
     def _setup_joint_offset(nr, thread):
