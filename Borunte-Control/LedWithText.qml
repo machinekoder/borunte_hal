@@ -14,6 +14,7 @@ Row {
     height: Screen.pixelDensity * 8
     width: height
     name: "rx_comm_error"
+    halPin.type: HalPin.S32
   }
 
   Text {

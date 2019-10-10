@@ -30,9 +30,17 @@ HalApplicationWindow {
       Layout.alignment: Layout.Center
       Layout.preferredWidth: Screen.pixelDensity * 60
       Layout.preferredHeight: Screen.pixelDensity * 30
-      name: "power-on"
+      name: "state_cmd"
+      halPin.type: HalPin.U32
       halPin.direction: HalPin.IO
       checkable: true
+
+      HalPin {
+        id: resetPin
+        name: "reset"
+        type: HalPin.HalBit
+        direction: HalPin.IO
+      }
 
       Text {
         anchors.centerIn: parent
@@ -53,7 +61,7 @@ HalApplicationWindow {
 
     LedWithText {
       Layout.alignment: Layout.Center
-      name: "estop-active"
+      name: "state_fb"
       text: qsTr("ESTOP Active")
     }
 
