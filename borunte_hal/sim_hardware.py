@@ -11,8 +11,9 @@ NUM_JOINTS = 6
 
 
 class Hardware(object):
-    def __init__(self, thread):
+    def __init__(self, thread, tool):
         self.thread = thread
+        self.tool = tool
         self.user_comps = []
         self.error_signals = []
 

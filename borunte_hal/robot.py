@@ -9,6 +9,7 @@ from .utils import HalThread, UserComp
 from .constants import COMPONENT_PATH, TIMEOUT_OVERHEAD
 
 SIM_MODE = bool(os.environ.get('SIM_MODE', 0))
+TOOL = os.environ.get('ROBOT_TOOL', 'none')
 NUM_JOINTS = 6
 
 
@@ -27,7 +28,7 @@ class BorunteConfig(object):
         self.user_comps = []
 
     def init(self):
-        self.hardware = Hardware(thread=self.thread)
+        self.hardware = Hardware(thread=self.thread, tool=TOOL)
 
     def setup(self):
         self.hardware.read()

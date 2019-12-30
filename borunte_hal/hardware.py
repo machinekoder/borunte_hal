@@ -20,11 +20,12 @@ NUM_JOINTS = 6
 
 
 class Hardware(object):
-    def __init__(self, thread):
+    def __init__(self, thread, tool):
         """
         :type thread: HalThread
         """
         self.thread = thread
+        self.tool = tool
         self._io_pins = {}
         self.user_comps = []
         self.error_signals = []
@@ -98,6 +99,9 @@ class Hardware(object):
         self.error_signals.append(error)
 
     def _init_gripper(self):
+        if not self.tool.startswith('hand_e'):
+            return
+
         name = 'robotiq-gripper'
         interval_s = 0.1
         hal.loadusr(
@@ -116,6 +120,9 @@ class Hardware(object):
         self.error_signals.append(error)
 
     def _setup_gripper(self):
+        if not self.tool.startswith('hand_e'):
+            return
+
         open_close = hal.Signal('gripper-open-close', hal.HAL_BIT)
         opened = hal.Signal('gripper-opened', hal.HAL_BIT)
         cmd_active = hal.Signal('gripper-cmd-active', hal.HAL_BIT)
