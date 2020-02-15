@@ -15,9 +15,7 @@ os.environ['PYTHONPATH'] = PATH
 
 def main():
     parser = argparse.ArgumentParser(
-        description='This is the anddemo demo run script '
-        'it demonstrates how a run script could look like '
-        'and of course starts the motorctrl demo'
+        description='This runs the Borunte HAL configuration'
     )
     parser.add_argument('-d', '--debug', help='Enable debug mode', action='store_true')
     parser.add_argument(
